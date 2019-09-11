@@ -10,15 +10,19 @@ import (
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 	"github.com/otiai10/gosseract"
+	"gonema/utils"
 	"io/ioutil"
 	"log"
 	"math"
 	"strconv"
 	"strings"
 	"time"
-	"utils"
 )
 
+/*
+Main RARBG scraper.
+TODO implement name usage
+*/
 func GetTorrentLinks(name,imdbID string)error{
 	mainDomain := "https://rarbgunblock.com"
 	mainSearchLink := mainDomain+"/torrents.php?search="+imdbID
@@ -30,7 +34,7 @@ func GetTorrentLinks(name,imdbID string)error{
 	defer cancel()
 
 
-	//try to get to the main page, eventually dealing with threat security pages, for a maximum amount of time
+	//try to get to the main page, possibly dealing with threat security pages, for a maximum amount of time
 	const maxMainPageTentatives = 3
 	currentMainPageTentatives := 0
 
