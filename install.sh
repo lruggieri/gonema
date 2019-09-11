@@ -90,17 +90,25 @@ fi
 
 #Now, proceed with Go dependencies installation; this step uses dep (https://github.com/golang/dep)
 if command -v $GOPATH/bin/dep >/dev/null 2>&1 ; then
-    shw_norm "Installing project dependencies"
-    $GOPATH/bin/dep ensure
-    shw_info "Project dependencies installed"
+    shw_info "Dep already installed"
 else
     shw_warn "Dep not installed! Installing..."
+
+    #dep requires folder $GOPATH/bin to exist
+    if [[ ! -d "$GOPATH/dep" ]]; then
+        sudo mkdir $GOPATH/dep
+    fi
+
     curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
     if command -v $GOPATH/bin/dep ; then
         shw_info "Dep installed"
     else
-        shw_err "Cannot instal dep. Aborting"
+        shw_err "Cannot install dep. Aborting"
         exit 1
     fi
 fi
+
+shw_norm "Installing project dependencies"
+$GOPATH/bin/dep ensure
+shw_info "Project dependencies installed"
