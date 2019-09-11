@@ -3,7 +3,7 @@ package rarbg
 import (
 	"github.com/sirupsen/logrus"
 	"testing"
-	"utils"
+	"gonema/utils"
 )
 
 func TestGetTorrentLinks(t *testing.T) {

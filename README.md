@@ -4,7 +4,7 @@ I like to watch some movie even twice ot 3 times, and I am not always
 finding myself with the possibility to go to the cinema to do it.
 So I may or may not download that movie using Torrent, because
 I like high-quality video source, and I may or may not be tired of looking
-form time to time to check if the desired version is out or not, so...this is a way
+from time to time to check if my desired version is out or not, so...this is a way
 to help me and possibly someone else to make this process easier and having fun in doing so!
 
 #### CAPABILITIES
