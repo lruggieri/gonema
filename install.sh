@@ -27,13 +27,12 @@ isDistro () {
     local os=$1
     shift
     local distros=("$@")
+    
 
     for dist in "${distros[@]}";
     do
-        echo $dist
-        #echo $os
-        if [[ ${dist} == *"${os}"* ]]; then
-            echo "OK"
+        if [[ "${os}" == *"${dist}"* ]]; then
+            echo "OK $os $dist"
             return 0
         fi
     done
@@ -43,15 +42,10 @@ isDistro () {
 
 OS="$(/bin/bash getOS.sh)"
 
-echo $(isDistro "$OS" "${DISTRO_REDHAT[@]}" )
-#echo $(isDistro "$OS" "${DISTRO_UBUNTU[@]}" )
 
-
-exit 0
-
-
-if [[ $OS == *"CentOS"* || $OS == *"Red Hat"* ]]; then
+if isDistro "$OS" "${DISTRO_REDHAT[@]}"; then
     shw_info "Red Hat distribution '$OS' detected"
+    
 
     shw_norm "Installing epel-release..."
     if yum installed "epel-release" >/dev/null 2>&1; then
@@ -69,13 +63,10 @@ if [[ $OS == *"CentOS"* || $OS == *"Red Hat"* ]]; then
         sudo yum install -y tesseract-devel leptonica-devel
         shw_info "tesseract with leptonica installed"
     fi
-
-
-elif [[ $OS == *"Ubuntu"* ]]; then
+elif isDistro "$OS" "${$DISTRO_UBUNTU[@]}"; then
     shw_info "Ubuntu distribution '$OS' detected"
 
-
-    shw_norm "Installing tesseract (with leptonica)..."
+    shw_norm "Installing tesseract with leptonica..."
     if command -v tesseract >/dev/null 2>&1  ; then
         shw_norm "tesseract already installed"
     else
