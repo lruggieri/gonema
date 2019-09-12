@@ -137,6 +137,14 @@
   version = "v0.7.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:24e54cc0cb8f729a801b83ab732d136ab67f27631a5d152daa275670f5f79c7a"
+  name = "github.com/nmmh/magneturi"
+  packages = ["magneturi"]
+  pruneopts = "UT"
+  revision = "464c677b3fb57e9ce053c0abb5a35dde46db6855"
+
+[[projects]]
   digest = "1:f3b5bf575d84780832516c53d135b4917fe891ca67c472959578b7e09277e4b2"
   name = "github.com/otiai10/gosseract"
   packages = ["."]
@@ -170,6 +178,7 @@
     "github.com/chromedp/cdproto/page",
     "github.com/chromedp/chromedp",
     "github.com/davecgh/go-spew/spew",
+    "github.com/nmmh/magneturi/magneturi",
     "github.com/otiai10/gosseract",
     "github.com/sirupsen/logrus",
   ]
