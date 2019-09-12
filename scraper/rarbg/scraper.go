@@ -9,7 +9,9 @@ import (
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
+	"github.com/nmmh/magneturi/magneturi"
 	"github.com/otiai10/gosseract"
+	"gonema/torrent"
 	"gonema/utils"
 	"io/ioutil"
 	"log"
@@ -21,11 +23,11 @@ import (
 
 /*
 Main RARBG scraper.
-TODO implement name usage
+TODO implement name usage ('/torrents.php?search=...')
 */
-func GetTorrentLinks(name,imdbID string)error{
+func GetTorrentLinks(name,imdbID string) (oTorrents []torrent.Torrent, oErr error){
 	mainDomain := "https://rarbgunblock.com"
-	mainSearchLink := mainDomain+"/torrents.php?search="+imdbID
+	mainSearchLink := mainDomain+"/torrents.php?imdb="+imdbID
 
 	if utils.DebugActive{utils.Logger.Debug("Creating new context")}
 	ctx, cancel := chromedp.NewContext(context.Background(),
@@ -33,103 +35,67 @@ func GetTorrentLinks(name,imdbID string)error{
 	)
 	defer cancel()
 
+	//set initial cookies
+	err := chromedp.Run(ctx,
+		//setting these cookies should avoid the threat captcha page to be triggered
+		setCookies(
+			"aby","2",
+			"gaDts48g","q8h5pp9t",
+			"skt","VP9ACbuwhy",
+			"ppu_main_9ef78edf998c4df1e1636c9a474d9f47","1",
+			"c","190lpr6xcfywz3h",
+			"","tcc",),
+	)
+	if err != nil{
+		return nil,err
+	}
 
-	//try to get to the main page, possibly dealing with threat security pages, for a maximum amount of time
-	const maxMainPageTentatives = 3
-	currentMainPageTentatives := 0
 
-	/*
-	Even after decoding the captcha, if necessary, we get redirected with the main page, and not to the page search initially (with
-	the iMDB film ID), so we need a round of navigation even after decoding the captcha
-	*/
-	for{
-
-		if utils.DebugActive{utils.Logger.Debug("Navigating to "+ mainSearchLink +", tentative "+strconv.Itoa(currentMainPageTentatives))}
-		err := chromedp.Run(ctx,
-			//setting these cookies should avoid the threat captcha page to be triggered
-			setCookies(
-				"aby","2",
-				"gaDts48g","q8h5pp9t",
-				"skt","VP9ACbuwhy",
-				"ppu_main_9ef78edf998c4df1e1636c9a474d9f47","1",
-				"c","190lpr6xcfywz3h",
-				"","tcc",),
-			//page.SetDownloadBehavior(page.SetDownloadBehaviorBehaviorAllow).WithDownloadPath("/home/luca/go/central/src/gonema/scraper"),
-			chromedp.Navigate(mainSearchLink),
-		)
-		if err != nil{
-			return err
-		}
-
-		//print cookies
-		if utils.DebugActive{
-			err = chromedp.Run(ctx,
-				chromedp.ActionFunc(func(ctx context.Context) error {
-					cookies, err := network.GetAllCookies().Do(ctx)
-					if err != nil {
-						return err
-					}
-
-					for i, cookie := range cookies {
-						log.Printf("chrome cookie %d: %+v", i, cookie)
-					}
-
-					return nil
-				}),
-			)
-			if err != nil{
-				return err
-			}
-		}
-
-		landedOnExpectedPage, landedOnThreatDefencePage, err := landedRARBGPageInfo(mainSearchLink,ctx)
-		if err != nil{
-			return err
-		}
-		if landedOnExpectedPage{
-			if utils.DebugActive{utils.Logger.Debug("landed on expected page: "+ mainSearchLink)}
-			break
-		}
-		currentMainPageTentatives ++
-		if currentMainPageTentatives > maxMainPageTentatives{
-			return errors.New("cannot land on page "+ mainSearchLink +". Max tentatives ("+strconv.Itoa(maxMainPageTentatives)+") reached")
-		}
-
-		if landedOnThreatDefencePage{
-			if utils.DebugActive{utils.Logger.Debug("Threat defence page triggered")}
-			err = dealWithThreatDefencePage(ctx,cancel)
-			if err != nil{
-				return err
-			}
-			if utils.DebugActive{utils.Logger.Debug("Threat defence page was dealt with")}
-		}
+	err = navigateWithCaptchaDetection(ctx,cancel,mainSearchLink)
+	if err != nil{
+		return nil,err
 	}
 
 	//getting the full list film nodes info
-	var titles []*cdp.Node
-	var sizes []*cdp.Node
-	err := chromedp.Run(ctx,
-		chromedp.Nodes(`tr[class="lista2"] > td:nth-child(2) > a:nth-child(1)`, &titles, chromedp.ByQueryAll),
-		chromedp.Nodes(`tr[class="lista2"] > td:nth-child(4)`, &sizes, chromedp.ByQueryAll),
+	specificTorrentNodesToCrawl := make([]*cdp.Node,0)
+	err = chromedp.Run(ctx,
+		chromedp.Nodes(`tr[class="lista2"] > td:nth-child(2) > a:nth-child(1)`, &specificTorrentNodesToCrawl, chromedp.ByQueryAll),
 	)
 	if err != nil{
-		return err
+		return nil,err
 	}
 
-	//films sizes have to match films titles
-	if len(titles) != len(sizes){
-		return errors.New("retrieved "+strconv.Itoa(len(titles))+" titles but "+strconv.Itoa(len(sizes))+" sizes")
+	specificTorrentLinksToCrawl := make([]string,len(specificTorrentNodesToCrawl))
+	for torrentNodeIdx, torrentNode := range specificTorrentNodesToCrawl{
+		specificTorrentLinksToCrawl[torrentNodeIdx] = torrentNode.AttributeValue("href")
 	}
 
-	for titleNodeIdx, titleNode := range titles{
-		fmt.Println(titleNode.AttributeValue("title"))
-		for _,c := range sizes[titleNodeIdx].Children{
-			fmt.Println(c.NodeValue)
+	finalTorrents := make([]torrent.Torrent,len(specificTorrentLinksToCrawl))
+	for _,specificTorrentLinkToCrawl := range specificTorrentLinksToCrawl{
+		err = navigateWithCaptchaDetection(ctx,cancel, mainDomain+specificTorrentLinkToCrawl)
+		if err != nil{
+			return nil,err
 		}
+		magnetNodes := make([]*cdp.Node,0)
+		err = chromedp.Run(ctx,
+			chromedp.Nodes(
+				`html > body > table:nth-child(6) > tbody > 
+					tr:nth-child(1) > td:nth-child(2) > div > table > tbody > tr:nth-child(2) > 
+					td:nth-child(1) > div > table > tbody > tr:nth-child(1) > td:nth-child(2) > a:nth-child(3)`, &magnetNodes, chromedp.ByQueryAll,
+			),
+		)
+		magnetLinkString := magnetNodes[0].AttributeValue("href")
+		magnetLink, err := magneturi.Parse(magnetLinkString,false)
+		if err != nil{
+			return nil,err
+		}
+		finalTorrents = append(finalTorrents, torrent.Torrent{
+			MagnetLink:*magnetLink, //let's bring along pointers when not needed please! Have mercy for the heap!
+		})
 	}
 
 
-	return nil
+	return finalTorrents,nil
 }
 
 func dealWithThreatDefencePage(ctx context.Context, cancel context.CancelFunc) (oErr error){
@@ -284,11 +250,12 @@ Remember to pass cookies in the format key1,value1,...keyN,valueN. So they must 
 func setCookies(cookies ...string) chromedp.ActionFunc{
 	return chromedp.ActionFunc(func(ctx context.Context) error {
 		// create cookie expiration
-		//expr := cdp.TimeSinceEpoch(time.Now().Add(180 * 24 * time.Hour))
+		expr := cdp.TimeSinceEpoch(time.Now().Add(180 * 24 * time.Hour))
 		// add cookies to chrome
 		for i := 0; i < len(cookies); i += 2 {
 			success, err := network.SetCookie(cookies[i], cookies[i+1]).
 				WithDomain(".rarbgunblock.com").
+				WithExpires(&expr).
 				Do(ctx)
 			if err != nil {
 				return err
@@ -299,4 +266,73 @@ func setCookies(cookies ...string) chromedp.ActionFunc{
 		}
 		return nil
 	})
+}
+func navigateWithCaptchaDetection(iCtx context.Context, iCancel context.CancelFunc,iTargetPage string) error{
+	//try to get to the main page, possibly dealing with threat security pages, for a maximum amount of time
+	const maxMainPageTentatives = 3
+	currentMainPageTentatives := 0
+
+	/*
+	Even after decoding the captcha, if necessary, we get redirected with the main page, and not to the page search initially (with
+	the iMDB film ID), so we need a round of navigation even after decoding the captcha
+	*/
+	for{
+
+		if utils.DebugActive{utils.Logger.Debug("Navigating to "+ iTargetPage +", tentative "+strconv.Itoa(currentMainPageTentatives))}
+		err := chromedp.Run(iCtx,
+			//page.SetDownloadBehavior(page.SetDownloadBehaviorBehaviorAllow).WithDownloadPath("/home/luca/go/central/src/gonema/scraper"),
+			chromedp.Navigate(iTargetPage),
+		)
+		if err != nil{
+			return err
+		}
+
+		//print cookies
+		/*if utils.DebugActive{
+			err = chromedp.Run(iCtx,
+				chromedp.ActionFunc(func(ctx context.Context) error {
+					cookies, err := network.GetAllCookies().Do(ctx)
+					if err != nil {
+						return err
+					}
+
+					for i, cookie := range cookies {
+						log.Printf("chrome cookie %d: %+v", i, cookie)
+					}
+
+					return nil
+				}),
+			)
+			if err != nil{
+				return err
+			}
+		}*/
+
+		landedOnExpectedPage, landedOnThreatDefencePage, err := landedRARBGPageInfo(iTargetPage,iCtx)
+		if err != nil{
+			return err
+		}
+		if landedOnExpectedPage{
+			if utils.DebugActive{utils.Logger.Debug("landed on expected page: "+ iTargetPage)}
+			break
+		}
+		currentMainPageTentatives ++
+		if currentMainPageTentatives > maxMainPageTentatives{
+			return errors.New("cannot land on page "+ iTargetPage +". Max tentatives ("+strconv.Itoa(maxMainPageTentatives)+") reached")
+		}
+
+		if landedOnThreatDefencePage{
+			if utils.DebugActive{utils.Logger.Debug("Threat defence page triggered")}
+			err = dealWithThreatDefencePage(iCtx, iCancel)
+			if err != nil{
+				return err
+			}
+			if utils.DebugActive{utils.Logger.Debug("Threat defence page was dealt with")}
+		}
+	}
+	return nil
+}
+func executeActionWithTimeout(iCtx context.Context, iCancel context.CancelFunc, iAction chromedp.ActionFunc, iRenewContextIfTimeOut bool) error{
+
+	err := chromedp.Run(iCtx, iAction)
 }

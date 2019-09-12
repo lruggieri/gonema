@@ -1,17 +1,20 @@
 package rarbg
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/sirupsen/logrus"
-	"testing"
 	"gonema/utils"
+	"testing"
 )
 
 func TestGetTorrentLinks(t *testing.T) {
 	utils.DebugActive = true
 	utils.Logger.Level = logrus.DebugLevel
-	err := GetTorrentLinks("","tt6146586")
+	finalTorrents,err := GetTorrentLinks("","tt6146584")
 	if err != nil{
 		t.Error(err)
 		t.FailNow()
 	}
+
+	spew.Dump(finalTorrents)
 }
