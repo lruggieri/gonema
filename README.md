@@ -7,6 +7,8 @@ I like high-quality video source, and I may or may not be tired of looking
 from time to time to check if my desired version is out or not, so...this is a way
 to help me and possibly someone else to make this process easier and having fun in doing so!
 
+
+
 #### CAPABILITIES
 This project aims to create an API capable of returning information about a 
 huge collection of movies, along with several available Torrent versions and links.
@@ -14,6 +16,13 @@ It will also offer the possibility of subscribing for a specific movie and recei
 about the availability of a specific Torrent version (quality, source, etc.).
 
 This API will be fully developed in [Golang](https://golang.org/).
+
+
+
+#### REQUIREMENTS
+- Golang 1.6 or grater
+- Debian or RedHad based Linux distribution
+
 
 #### INSTALLATION
 Run
@@ -29,4 +38,7 @@ sudo ./install.sh
 about the searched movie
 - [ ] Build Docker image
 - [ ] Deploy on cloud
+- [ ] Improve the API. Add Movie information from Imdb, possibly using their API
+- [ ] Create a local DB using ElasticSearch
 - [ ] Build a minimal website version in order to use the API
+- [ ] Improve website with more complex JS
