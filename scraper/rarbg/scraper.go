@@ -21,13 +21,15 @@ import (
 	"time"
 )
 
+//Main RARBG scraper.
+type Scraper struct{}
+
 /*
-Main RARBG scraper.
 TODO implement name usage ('/torrents.php?search=...')
 */
-func GetTorrentLinks(name,imdbID string) (oTorrents []torrent.Torrent, oErr error){
+func (sc *Scraper)GetTorrentLinks(iResourceName, iResourceImdbID string) (oTorrents []torrent.Torrent, oErr error){
 	mainDomain := "https://rarbgunblock.com"
-	mainSearchLink := mainDomain+"/torrents.php?imdb="+imdbID
+	mainSearchLink := mainDomain+"/torrents.php?imdb="+ iResourceImdbID
 
 	if utils.DebugActive{utils.Logger.Debug("Creating new context")}
 	ctx, cancel := chromedp.NewContext(context.Background(),
