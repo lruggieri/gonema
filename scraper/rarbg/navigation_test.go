@@ -5,10 +5,51 @@ import (
 	"fmt"
 	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/chromedp"
+	"github.com/sirupsen/logrus"
+	"gonema/utils"
 	"os"
 	"path"
 	"testing"
 )
+
+func TestCaptchaSelection(t *testing.T){
+	mainContext := context.Background()
+
+	ctx, cancel := chromedp.NewContext(mainContext,
+		//chromedp.WithDebugf(log.Printf),
+	)
+	defer cancel()
+
+
+	wd, err := os.Getwd()
+	if err != nil{
+		t.Error(err)
+		t.FailNow()
+	}
+
+	//using a real RARBG HTML page as testing file
+	testFilePath := "file://" + path.Join(wd,"testing_files","rarbg_search_page.html")
+
+	fmt.Println("Navigating to test file",testFilePath)
+	err = chromedp.Run(ctx,
+		chromedp.Navigate(testFilePath),
+	)
+	if err != nil{
+		t.Error(err)
+		t.FailNow()
+	}
+
+	fmt.Println("Navigated")
+
+	//if we try to detect captcha now, we would get an error
+	utils.DebugActive=true
+	utils.Logger.Level = logrus.DebugLevel
+	err = dealWithThreatDefencePage(ctx)
+	if err != context.DeadlineExceeded{
+		t.Error("Expecting to get '",context.DeadlineExceeded,"' error")
+		t.FailNow()
+	}
+}
 
 func TestTorrentTitleSelection(t *testing.T){
 	ctx, cancel := chromedp.NewContext(context.Background(),

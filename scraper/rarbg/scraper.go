@@ -58,9 +58,15 @@ func GetTorrentLinks(name,imdbID string) (oTorrents []torrent.Torrent, oErr erro
 
 	//getting the full list film nodes info
 	specificTorrentNodesToCrawl := make([]*cdp.Node,0)
-	err = chromedp.Run(ctx,
-		chromedp.Nodes(`tr[class="lista2"] > td:nth-child(2) > a:nth-child(1)`, &specificTorrentNodesToCrawl, chromedp.ByQueryAll),
+	timeout, err := executeRunWithTimeout(
+		ctx,
+		time.Second,
+		chromedp.Nodes(MainTorrentListPageLinks, &specificTorrentNodesToCrawl, chromedp.ByQueryAll),
 	)
+	if timeout{
+		//there is nothing to be fetched in this page
+		return nil,nil
+	}
 	if err != nil{
 		return nil,err
 	}
@@ -70,20 +76,24 @@ func GetTorrentLinks(name,imdbID string) (oTorrents []torrent.Torrent, oErr erro
 		specificTorrentLinksToCrawl[torrentNodeIdx] = torrentNode.AttributeValue("href")
 	}
 
-	finalTorrents := make([]torrent.Torrent,len(specificTorrentLinksToCrawl))
+	finalTorrents := make([]torrent.Torrent,0,len(specificTorrentLinksToCrawl))
 	for _,specificTorrentLinkToCrawl := range specificTorrentLinksToCrawl{
-		err = navigateWithCaptchaDetection(ctx,cancel, mainDomain+specificTorrentLinkToCrawl)
+		specificTorrentPage := mainDomain+specificTorrentLinkToCrawl
+		err = navigateWithCaptchaDetection(ctx, cancel, specificTorrentPage)
 		if err != nil{
 			return nil,err
 		}
 		magnetNodes := make([]*cdp.Node,0)
-		err = chromedp.Run(ctx,
-			chromedp.Nodes(
-				`html > body > table:nth-child(6) > tbody > 
-					tr:nth-child(1) > td:nth-child(2) > div > table > tbody > tr:nth-child(2) > 
-					td:nth-child(1) > div > table > tbody > tr:nth-child(1) > td:nth-child(2) > a:nth-child(3)`, &magnetNodes, chromedp.ByQueryAll,
-			),
+		timeout,err = executeRunWithTimeout(ctx,
+			500*time.Millisecond,
+			chromedp.Nodes(SpecificTorrentPageMagnet, &magnetNodes, chromedp.ByQueryAll),
 		)
+		if timeout{
+			return nil,errors.New("timeout when fetching data for torrent page "+specificTorrentPage)
+		}
+		if err != nil{
+			return nil,err
+		}
 		magnetLinkString := magnetNodes[0].AttributeValue("href")
 		magnetLink, err := magneturi.Parse(magnetLinkString,false)
 		if err != nil{
@@ -98,36 +108,25 @@ func GetTorrentLinks(name,imdbID string) (oTorrents []torrent.Torrent, oErr erro
 	return finalTorrents,nil
 }
 
-func dealWithThreatDefencePage(ctx context.Context, cancel context.CancelFunc) (oErr error){
-	defer func(){
-		if oErr != nil && oErr.Error() == context.Canceled.Error(){
-			oErr = errors.New("timeout found during captcha check. Context cancellation triggered")
-		}
-	}()
-
-
+func dealWithThreatDefencePage(iParentCtx context.Context) (oErr error){
 	maxCaptchaCheckTrials := 3
 	var threatCaptchaImageBytes []byte
 	var threatCaptchaBox1Bytes []byte
 	var threatCaptchaBox2Bytes []byte
 
+
+
 	captchaFound := false
 	captchaPageWaitTime := 6 * time.Second
-	captchaCheckTimeout := captchaPageWaitTime + 10 * time.Second
+
+	newChildContext,cancel := context.WithDeadline(iParentCtx,time.Now().Add(captchaPageWaitTime + 10*time.Second))
+	defer cancel()
+
 	for i := 0 ; i < maxCaptchaCheckTrials ; i++{
 		if utils.DebugActive{utils.Logger.Debug("Trying to take a screenShot of the captcha to be decoded ... " +
 			"tentative "+strconv.Itoa(i+1)+"/"+strconv.Itoa(maxCaptchaCheckTrials))}
 
-		doneRunning := false //to keep track of the fact that the chromedp.Run function of this cycle ended or not
-		//function to emulate a timeout
-		go func(doneRunning *bool){
-			time.Sleep(captchaCheckTimeout)
-
-			if !*doneRunning{
-				cancel()
-			}
-		}(&doneRunning)
-		err := chromedp.Run(ctx,
+		err := chromedp.Run(newChildContext,
 			chromedp.Sleep(captchaPageWaitTime),
 			chromedp.Screenshot(
 				CaptchaPageImagePath,
@@ -152,7 +151,7 @@ func dealWithThreatDefencePage(ctx context.Context, cancel context.CancelFunc) (
 		decodedCaptcha, _ := client.Text()
 		if utils.DebugActive{utils.Logger.Debug("image decoded. result: "+decodedCaptcha)}
 
-		err = chromedp.Run(ctx,
+		err = chromedp.Run(iParentCtx,
 			chromedp.SendKeys(CaptchaStringInputID,decodedCaptcha,chromedp.ByID),
 			chromedp.Screenshot(
 				CaptchaPageImageBox,
@@ -174,9 +173,6 @@ func dealWithThreatDefencePage(ctx context.Context, cancel context.CancelFunc) (
 				log.Fatal(err)
 			}
 		}
-
-
-		doneRunning = true
 
 		break
 	}
@@ -323,7 +319,7 @@ func navigateWithCaptchaDetection(iCtx context.Context, iCancel context.CancelFu
 
 		if landedOnThreatDefencePage{
 			if utils.DebugActive{utils.Logger.Debug("Threat defence page triggered")}
-			err = dealWithThreatDefencePage(iCtx, iCancel)
+			err = dealWithThreatDefencePage(iCtx)
 			if err != nil{
 				return err
 			}
@@ -332,7 +328,16 @@ func navigateWithCaptchaDetection(iCtx context.Context, iCancel context.CancelFu
 	}
 	return nil
 }
-func executeActionWithTimeout(iCtx context.Context, iCancel context.CancelFunc, iAction chromedp.ActionFunc, iRenewContextIfTimeOut bool) error{
+func executeRunWithTimeout(iFatherCtx context.Context, iTimeoutDuration time.Duration, iActions ...chromedp.Action) (oTimeout bool, oErr error){
+	newChildContext,_ := context.WithDeadline(iFatherCtx, time.Now().Add(iTimeoutDuration))
 
-	err := chromedp.Run(iCtx, iAction)
+	err := chromedp.Run(newChildContext,iActions...)
+	if err != nil{
+		if err == context.DeadlineExceeded{
+			return true, err
+		}
+		return false, err
+	}
+
+	return false, nil
 }
