@@ -113,5 +113,6 @@ fi
 #Now, proceed with Go dependencies installation; this step uses 'go mod'
 
 shw_norm "Installing project dependencies"
+export GO111MODULE=on #necessary to install dependencies inside 'GOPATH/src'
 go mod vendor
 shw_info "Project dependencies installed"
