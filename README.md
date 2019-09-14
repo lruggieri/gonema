@@ -20,7 +20,7 @@ This API will be fully developed in [Golang](https://golang.org/).
 
 
 #### REQUIREMENTS
-- Golang 1.6 or grater
+- Golang 1.11 or grater
 - Debian or RedHad based Linux distribution
 
 
