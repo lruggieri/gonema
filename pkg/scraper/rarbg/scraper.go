@@ -38,6 +38,8 @@ func getScraperRoundRobin() context.Context{
 	defer availableScrapersLock.Unlock()
 
 	randomScraperPosition := utils.GetRandomPositiveInt(len(availableScrapers))
+
+	if utils.DebugActive{utils.Logger.Debug("Using random scraper #"+strconv.Itoa(randomScraperPosition))}
 	randomScraper := availableScrapers[randomScraperPosition]
 	if randomScraper.Err() != nil{
 		if utils.DebugActive{utils.Logger.Debug("Re-initializing context")}
