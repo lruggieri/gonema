@@ -117,7 +117,7 @@ func (sc *Scraper)GetTorrentLinks(iResourceName, iResourceImdbID string) (oTorre
 		}
 		magnetNodes := make([]*cdp.Node,0)
 		timeout,err = executeRunWithTimeout(ctx,
-			500*time.Millisecond,
+			2*time.Second,
 			chromedp.Nodes(specificTorrentPageMagnet, &magnetNodes, chromedp.ByQueryAll),
 		)
 		if timeout{
