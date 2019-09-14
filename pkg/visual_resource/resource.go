@@ -1,11 +1,11 @@
-package visualResource
+package visual_resource
 
 import (
 	"encoding/json"
 	"errors"
-	"gonema/scraper"
-	"gonema/scraper/rarbg"
-	"gonema/torrent"
+	"gitlab.com/ruggieri/gonema/pkg/scraper"
+	"gitlab.com/ruggieri/gonema/pkg/scraper/rarbg"
+	"gitlab.com/ruggieri/gonema/pkg/torrent"
 	"time"
 )
 

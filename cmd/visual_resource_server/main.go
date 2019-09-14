@@ -1,11 +1,11 @@
 package main
 
 import (
-	"gonema/vendor/github.com/sirupsen/logrus"
-	"gonema/visualResource"
+	"github.com/sirupsen/logrus"
+	"gitlab.com/ruggieri/gonema/pkg/utils"
+	"gitlab.com/ruggieri/gonema/pkg/visual_resource"
 	"log"
 	"net/http"
-	"utils"
 )
 
 func main(){
@@ -19,6 +19,7 @@ func main(){
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
 
+
 func emptyRequest(w http.ResponseWriter, r *http.Request){
 	http.NotFound(w,r)
 }
@@ -26,7 +27,7 @@ func emptyRequest(w http.ResponseWriter, r *http.Request){
 func resourceInfo(w http.ResponseWriter, r *http.Request){
 	requestParameters:= r.URL.Query()
 	if imdbID:= requestParameters.Get("imdbID") ; len(imdbID) > 0{
-		resource,err := visualResource.GetResource("",imdbID)
+		resource,err := visual_resource.GetResource("",imdbID)
 		if err != nil{
 			dealWithInternalError(w,err)
 		}else{

@@ -1,4 +1,4 @@
-package visualResource
+package visual_resource
 
 import (
 	"encoding/json"

@@ -1,8 +1,8 @@
 package scraper
 
 import (
-	"gonema/scraper/rarbg"
-	"gonema/torrent"
+	"gitlab.com/ruggieri/gonema/pkg/scraper/rarbg"
+	"gitlab.com/ruggieri/gonema/pkg/torrent"
 )
 
 type TorrentScraper interface{
