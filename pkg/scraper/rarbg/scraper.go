@@ -117,11 +117,13 @@ func (sc *Scraper)GetTorrentLinks(iResourceName, iResourceImdbID string) (oTorre
 		}
 		magnetNodes := make([]*cdp.Node,0)
 		timeout,err = executeRunWithTimeout(ctx,
-			500*time.Millisecond,
+			1*time.Second,
 			chromedp.Nodes(specificTorrentPageMagnet, &magnetNodes, chromedp.ByQueryAll),
 		)
 		if timeout{
-			return nil,errors.New("timeout when fetching data for torrent page "+specificTorrentPage)
+			//TODO log better with Logstash
+			utils.Logger.Error(errors.New("timeout when fetching data for torrent page "+specificTorrentPage+ ", continuing..."))
+			continue
 		}
 		if err != nil{
 			return nil,err
@@ -131,6 +133,7 @@ func (sc *Scraper)GetTorrentLinks(iResourceName, iResourceImdbID string) (oTorre
 		if err != nil{
 			return nil,err
 		}
+
 		finalTorrents = append(finalTorrents, torrent.Torrent{
 			MagnetLink:*magnetLink, //let's bring along pointers when not needed please! Have mercy for the heap!
 		})
@@ -251,9 +254,9 @@ func dealWithThreatDefencePage(iParentCtx context.Context) (oErr error){
 
 
 	captchaFound := false
-	captchaPageWaitTime := 6 * time.Second
+	captchaPageWaitTime := 10 * time.Second
 
-	newChildContext,cancel := context.WithDeadline(iParentCtx,time.Now().Add(captchaPageWaitTime + 10*time.Second))
+	newChildContext,cancel := context.WithDeadline(iParentCtx,time.Now().Add(captchaPageWaitTime))
 	defer cancel()
 
 	for i := 0 ; i < maxCaptchaCheckTrials ; i++{
@@ -261,7 +264,8 @@ func dealWithThreatDefencePage(iParentCtx context.Context) (oErr error){
 			"tentative "+strconv.Itoa(i+1)+"/"+strconv.Itoa(maxCaptchaCheckTrials))}
 
 		err := chromedp.Run(newChildContext,
-			chromedp.Sleep(captchaPageWaitTime),
+			chromedp.WaitVisible(captchaPageImagePath,chromedp.BySearch),
+			chromedp.Sleep(500*time.Millisecond), //necessary for some reason. Without, the following screenshot fails
 			chromedp.Screenshot(
 				captchaPageImagePath,
 				&threatCaptchaImageBytes,
@@ -292,7 +296,7 @@ func dealWithThreatDefencePage(iParentCtx context.Context) (oErr error){
 				&threatCaptchaBox1Bytes,
 				chromedp.BySearch),
 			chromedp.Click(captchaStringButtonSubmitID,chromedp.ByID),
-			chromedp.Sleep(5*time.Second), //waiting to get redirected to main page
+			chromedp.WaitVisible(mainTorrentListPageSearchBarID,chromedp.ByID), //waiting to get redirected to main page
 			fullScreenShot(90, &threatCaptchaBox2Bytes), //here we should get to the main torrent list page
 		)
 

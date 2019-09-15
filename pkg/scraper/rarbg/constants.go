@@ -13,6 +13,7 @@ const captchaStringButtonSubmitID = `#button_submit`
 
 
 //MAIN TORRENT LIST PAGE
+const mainTorrentListPageSearchBarID = `#searchinput`
 const mainTorrentListPageLinks = `tr[class="lista2"] > td:nth-child(2) > a:nth-child(1)`
 
 //SPECIFIC TORRENT PAGE

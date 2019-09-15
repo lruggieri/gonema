@@ -1,28 +1,14 @@
 #!/bin/bash
 
-shw_grey () {
-    echo $(tput bold)$(tput setaf 0) $@ $(tput sgr 0)
-}
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-shw_norm () {
-    echo $(tput bold)$(tput setaf 9) $@ $(tput sgr 0)
-}
-
-shw_info () {
-    echo $(tput bold)$(tput setaf 4) $@ $(tput sgr 0)
-}
-
-shw_warn () {
-    echo $(tput bold)$(tput setaf 2) $@ $(tput sgr 0)
-}
-shw_err ()  {
-    echo $(tput bold)$(tput setaf 1) $@ $(tput sgr 0)
-}
+. "$DIR/common.sh"
 
 shw_norm "initializing project"
 
 DISTRO_REDHAT=("Red Hat" "CentOS")
-DISTRO_UBUNTU=("Ubuntu" "Mint")
+DISTRO_UBUNTU=("Ubuntu" "Mint" "Debian")
 isDistro () {
     local os=$1
     shift
@@ -39,7 +25,7 @@ isDistro () {
     return 1
 }
 
-OS="$(/bin/bash getOS.sh)"
+OS="$(/bin/bash $DIR/getOS.sh)"
 
 
 if isDistro "$OS" "${DISTRO_REDHAT[@]}"; then
@@ -108,10 +94,5 @@ else
     shw_norm "Installing Google Chrome"
     curl https://intoli.com/install-google-chrome.sh | bash
     shw_info "Google Chrome installed"
+
 fi
-
-#Now, proceed with Go dependencies installation; this step uses 'go mod'
-
-shw_norm "Installing project dependencies"
-go mod vendor
-shw_info "Project dependencies installed"

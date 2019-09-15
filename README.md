@@ -27,18 +27,22 @@ This API will be fully developed in [Golang](https://golang.org/).
 #### INSTALLATION
 Run
 ```
-chmod +x install.sh
-chmod +x getOS.sh
-sudo ./install.sh
+chmod +x scripts/*
+sudo ./scripts/install_environment.sh
+sudo ./scripts/install_dependencies.sh
 ```
+
+#### DOCKER
+Docker for this project is available in Goggle Cloud Container Registry under '[eu.gcr.io/gonema/gonema](eu.gcr.io/gonema/gonema)'
 
 
 #### TODO LIST
-- [ ] Finalize a first version of the API, capable of returning basic information
+- [X] Finalize a first version of the API, capable of returning basic information
 about the searched movie
-- [ ] Build Docker image
-- [ ] Deploy on cloud
-- [ ] Improve the API. Add Movie information from Imdb, possibly using their API
-- [ ] Create a local DB using ElasticSearch
+- [X] Build Docker image
+- [X] Deploy on cloud
 - [ ] Build a minimal website version in order to use the API
+- [ ] Improve the API. Add Movie information from Imdb, possibly using their API
+- [ ] Implement CI (+ Docker integration)
+- [ ] Create a local DB using ElasticSearch
 - [ ] Improve website with more complex JS
