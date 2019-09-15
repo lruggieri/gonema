@@ -33,15 +33,16 @@ sudo ./scripts/install_dependencies.sh
 ```
 
 #### DOCKER
-Docker for this project is available in DockerHub under '[luc4ruggieri/gonema](https://hub.docker.com/r/luc4ruggieri/gonema)'
+Docker for this project is available in Goggle Cloud Container Registry under '[eu.gcr.io/gonema/gonema](eu.gcr.io/gonema/gonema)'
 
 
 #### TODO LIST
 - [X] Finalize a first version of the API, capable of returning basic information
 about the searched movie
 - [X] Build Docker image
-- [ ] Deploy on cloud
-- [ ] Improve the API. Add Movie information from Imdb, possibly using their API
-- [ ] Create a local DB using ElasticSearch
+- [X] Deploy on cloud
 - [ ] Build a minimal website version in order to use the API
+- [ ] Improve the API. Add Movie information from Imdb, possibly using their API
+- [ ] Implement CI (+ Docker integration)
+- [ ] Create a local DB using ElasticSearch
 - [ ] Improve website with more complex JS
