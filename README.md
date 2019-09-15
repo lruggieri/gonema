@@ -36,6 +36,10 @@ sudo ./scripts/install_dependencies.sh
 Docker for this project is available in Goggle Cloud Container Registry under '[eu.gcr.io/gonema/gonema](eu.gcr.io/gonema/gonema)'
 
 
+#### API ACCESS
+Access to this API is available at [https://gonemapi.ruggieri.tech](https://gonemapi.ruggieri.tech)
+
+
 #### TODO LIST
 - [X] Finalize a first version of the API, capable of returning basic information
 about the searched movie
