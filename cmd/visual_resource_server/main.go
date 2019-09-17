@@ -6,11 +6,24 @@ import (
 	"gitlab.com/ruggieri/gonema/pkg/visual_resource"
 	"log"
 	"net/http"
+	"time"
+)
+
+
+const(
+	resourceImdbIDElementCacheKey = "imdbID"
+	resourceNameElementCacheKey = "resourceName"
+)
+var(
+	localCache = utils.NewCache()
 )
 
 func main(){
 	utils.DebugActive = true
 	utils.Logger.Level = logrus.DebugLevel
+
+	localCache.SetNewRootElementDuration(resourceImdbIDElementCacheKey, time.Hour)
+	localCache.SetNewRootElementDuration(resourceNameElementCacheKey, 2 * time.Minute)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/",emptyRequest)
@@ -26,17 +39,29 @@ func emptyRequest(w http.ResponseWriter, r *http.Request){
 
 func resourceInfo(w http.ResponseWriter, r *http.Request){
 	requestParameters:= r.URL.Query()
-	if imdbID:= requestParameters.Get("imdbID") ; len(imdbID) > 0{
-		resource,err := visual_resource.GetResource("",imdbID)
-		if err != nil{
-			dealWithInternalError(w,err)
+	if imdbID := requestParameters.Get(resourceImdbIDElementCacheKey) ; len(imdbID) > 0{
+		if cachedResult := localCache.Fetch(resourceImdbIDElementCacheKey, utils.CacheElementKey(imdbID)) ; cachedResult != nil{
+			respond(w,http.StatusOK,[]byte(cachedResult.(string)))
 		}else{
-			respond(w,http.StatusOK,[]byte(resource.String()))
+			resource,err := visual_resource.GetResource("",imdbID)
+			resourceJson := resource.Json()
+			if err != nil{
+				dealWithInternalError(w,err)
+			}else{
+				respond(w,http.StatusOK,[]byte(resourceJson))
+			}
+			localCache.Insert(resourceImdbIDElementCacheKey, utils.CacheElementKey(imdbID), resourceJson)
 		}
-	}else if resourceTitle := requestParameters.Get("resourceTitle") ; len(resourceTitle) > 0{
-		respond(w,http.StatusOK,[]byte("Sorry, resourceTitle not handled yet"))
+	}else if resourceTitle := requestParameters.Get(resourceNameElementCacheKey) ; len(resourceTitle) > 0{
+		if cachedResult := localCache.Fetch(resourceNameElementCacheKey, utils.CacheElementKey(resourceTitle)) ; cachedResult != nil{
+			respond(w,http.StatusOK,[]byte(cachedResult.(string)))
+		}else{
+			respond(w,http.StatusOK,[]byte("Sorry, "+resourceNameElementCacheKey+" not handled yet"))
+			//TODO save in cache
+		}
 	}else{
-		respond(w,http.StatusBadRequest,[]byte("Please, specify 'imdbID' or 'resourceTitle'"))
+		respond(w,http.StatusBadRequest,[]byte(
+			"Please, specify '"+resourceImdbIDElementCacheKey+"' or '"+resourceNameElementCacheKey+"'"))
 	}
 }
 
