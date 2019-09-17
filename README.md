@@ -50,3 +50,4 @@ about the searched movie
 - [ ] Implement CI (+ Docker integration)
 - [ ] Create a local DB using ElasticSearch
 - [ ] Improve website with more complex JS
+- [ ] Integrate with Slack interactive commands
