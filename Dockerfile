@@ -1,4 +1,3 @@
-# Start from the latest golang base image
 FROM centos:7
 
 # Add Maintainer Info
@@ -35,19 +34,19 @@ RUN go mod download
 COPY scripts ./scripts
 RUN chmod +x scripts/*
 
-RUN ./scripts/install_environment.sh
+RUN ./scripts/installEnvironment.sh
 
 # Copy everything else in the Working Directory
 COPY . .
 
-RUN chmod +x scripts/install_dependencies.sh
-RUN ./scripts/install_dependencies.sh
+RUN chmod +x scripts/installDependencies.sh
+RUN ./scripts/installDependencies.sh
 
-# Build the Go app
-RUN go build -o gonema cmd/visual_resource_server/main.go
+# Build visualResourceServer app
+RUN go build -o visualResourceServer cmd/visualResourceServer/main.go
 
 # Expose port 8080 to the outside world
 EXPOSE 8080
 
-# Command to run the executable
-CMD ["./gonema"]
+# Command to run visualResourceServer
+CMD ["./visualResourceServer"]
