@@ -29,7 +29,13 @@ var availableScrapersLock sync.RWMutex
 func init(){
 	availableScrapers = make([]context.Context, 0, initialScrapersPoolSize)
 	for i := 0 ; i < cap(availableScrapers) ; i++{
-		availableScrapers = append(availableScrapers, context.Background())
+		newBaseContext := context.Background()
+		//we don't want to ever cancel a context, so let's not return it's cancel function
+		ctx, _ := chromedp.NewContext(newBaseContext,
+			//chromedp.WithDebugf(log.Printf),
+		)
+
+		availableScrapers = append(availableScrapers, ctx)
 	}
 }
 //returns a random scraper, eventually re-initializing it if non valid
@@ -38,6 +44,7 @@ func getScraperRoundRobin() context.Context{
 	defer availableScrapersLock.Unlock()
 
 	randomScraperPosition := utils.GetRandomPositiveInt(len(availableScrapers))
+
 
 	if utils.DebugActive{utils.Logger.Debug("Using random scraper #"+strconv.Itoa(randomScraperPosition))}
 	randomScraper := availableScrapers[randomScraperPosition]
@@ -62,27 +69,10 @@ func (sc *Scraper)GetTorrentLinks(iResourceName, iResourceImdbID string) (oTorre
 
 	if utils.DebugActive{utils.Logger.Debug("Creating new context")}
 	//we don't want to ever cancel a context, so let's not return it's cancel function
-	ctx, _ := chromedp.NewContext(getScraperRoundRobin(),
-		//chromedp.WithDebugf(log.Printf),
-	)
-
-	//set initial cookies
-	err := chromedp.Run(ctx,
-		//setting these cookies should avoid the threat captcha page to be triggered
-		setCookies(
-			"aby","2",
-			"gaDts48g","q8h5pp9t",
-			"skt","VP9ACbuwhy",
-			"ppu_main_9ef78edf998c4df1e1636c9a474d9f47","1",
-			"c","190lpr6xcfywz3h",
-			"","tcc",),
-	)
-	if err != nil{
-		return nil,err
-	}
+	randMainCtx := getScraperRoundRobin()
 
 
-	err = navigateWithCaptchaDetection(ctx,mainSearchLink)
+	err := navigateWithCaptchaDetection(randMainCtx,mainSearchLink)
 	if err != nil{
 		return nil,err
 	}
@@ -90,7 +80,7 @@ func (sc *Scraper)GetTorrentLinks(iResourceName, iResourceImdbID string) (oTorre
 	//getting the full list film nodes info
 	specificTorrentNodesToCrawl := make([]*cdp.Node,0)
 	timeout, err := executeRunWithTimeout(
-		ctx,
+		randMainCtx,
 		time.Second,
 		chromedp.Nodes(mainTorrentListPageLinks, &specificTorrentNodesToCrawl, chromedp.ByQueryAll),
 	)
@@ -111,13 +101,17 @@ func (sc *Scraper)GetTorrentLinks(iResourceName, iResourceImdbID string) (oTorre
 	//TODO possibly use goroutines. Unsure about the chance of getting banned for too much speed though.
 	for _,specificTorrentLinkToCrawl := range specificTorrentLinksToCrawl{
 		specificTorrentPage := mainDomain+specificTorrentLinkToCrawl
-		err = navigateWithCaptchaDetection(ctx, specificTorrentPage)
+		err = navigateWithCaptchaDetection(randMainCtx, specificTorrentPage)
 		if err != nil{
 			return nil,err
 		}
 		magnetNodes := make([]*cdp.Node,0)
-		timeout,err = executeRunWithTimeout(ctx,
+		timeout,err = executeRunWithTimeout(randMainCtx,
 			1*time.Second,
+			/*chromedp.ActionFunc(func(ctx context.Context) error {
+
+				//
+			}),*/
 			chromedp.Nodes(specificTorrentPageMagnet, &magnetNodes, chromedp.ByQueryAll),
 		)
 		if timeout{
@@ -227,7 +221,6 @@ func navigateWithCaptchaDetection(iCtx context.Context, iTargetPage string) erro
 			if err != nil{
 				return err
 			}
-			if utils.DebugActive{utils.Logger.Debug("Threat defence page was dealt with")}
 		}
 	}
 	return nil
@@ -318,6 +311,8 @@ func dealWithThreatDefencePage(iParentCtx context.Context) (oErr error){
 	if !captchaFound{
 		return errors.New("captcha could not be decoded")
 	}
+
+	if utils.DebugActive{utils.Logger.Debug("threat defence page has been dealt with")}
 
 	return nil
 }

@@ -40,13 +40,24 @@ Docker for this project is available in Goggle Cloud Container Registry under '[
 Access to this API is available at [https://gonemapi.ruggieri.tech](https://gonemapi.ruggieri.tech)
 
 
-#### TODO LIST
+#### USAGE
+At this moment resources can be retrieved only through *imdbID*
+
+`/resourceInfo?imdbID=tt6146586`
+
+no local database is implemented at the moment, and the first search for each new *imdbID* can possibly
+take some time to be fetched (due to captcha recognition and general crawling) but subsequent request
+on the same *imdbID* should take much less time, due to caching mechanism.
+Only Torrent information is returned at the moment.
+
+#### TODO LIST (working on bolded)
 - [X] Finalize a first version of the API, capable of returning basic information
 about the searched movie
 - [X] Build Docker image
 - [X] Deploy on cloud
-- [ ] Build a minimal website version in order to use the API
+- [ ] **Build a minimal website version in order to use the API**
 - [ ] Improve the API. Add Movie information from Imdb, possibly using their API
 - [ ] Implement CI (+ Docker integration)
 - [ ] Create a local DB using ElasticSearch
 - [ ] Improve website with more complex JS
+- [ ] Integrate with Slack interactive commands

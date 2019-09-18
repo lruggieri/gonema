@@ -10,7 +10,7 @@ import (
 )
 
 type Resource interface{
-	String() string
+	Json() string
 
 
 	setInfo() error
@@ -43,7 +43,7 @@ type resource struct{
 	Directors         []string          `json:"directors"`
 	AvailableTorrents []torrent.Torrent `json:"available_torrents"`
 }
-func(r *resource) String() string{
+func(r *resource) Json() string{
 	jsonMovie, err := json.Marshal(r)
 	if err != nil{
 		return ""
