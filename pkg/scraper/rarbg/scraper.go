@@ -240,9 +240,9 @@ func executeRunWithTimeout(iFatherCtx context.Context, iTimeoutDuration time.Dur
 }
 func dealWithThreatDefencePage(iParentCtx context.Context) (oErr error){
 	maxCaptchaCheckTrials := 3
-	var threatCaptchaImageBytes []byte
-	var threatCaptchaBox1Bytes []byte
-	var threatCaptchaBox2Bytes []byte
+	var threatCaptchaBeforeResolutionImageBytes []byte //page screenshot before resolving captcha
+	var threatCaptchaBoxAfterResolutionBytes []byte //page screenshot after resolving captcha
+	var threatCaptchaBoxAfterRedirectionBytes []byte //page screenshot after clicking on submit captcha and being redirected
 
 
 
@@ -261,13 +261,13 @@ func dealWithThreatDefencePage(iParentCtx context.Context) (oErr error){
 			chromedp.Sleep(500*time.Millisecond), //necessary for some reason. Without, the following screenshot fails
 			chromedp.Screenshot(
 				captchaPageImagePath,
-				&threatCaptchaImageBytes,
+				&threatCaptchaBeforeResolutionImageBytes,
 				chromedp.BySearch),
 		)
 		if err != nil{
 			return err
 		}
-		if threatCaptchaImageBytes == nil || len(threatCaptchaImageBytes) == 0{
+		if threatCaptchaBeforeResolutionImageBytes == nil || len(threatCaptchaBeforeResolutionImageBytes) == 0{
 			continue
 		}
 
@@ -278,29 +278,29 @@ func dealWithThreatDefencePage(iParentCtx context.Context) (oErr error){
 		if utils.DebugActive{utils.Logger.Debug("Calling tesseract to decode image")}
 		client := gosseract.NewClient()
 		defer client.Close()
-		client.SetImageFromBytes(threatCaptchaImageBytes)
+		client.SetImageFromBytes(threatCaptchaBeforeResolutionImageBytes)
 		decodedCaptcha, _ := client.Text()
 		if utils.DebugActive{utils.Logger.Debug("image decoded. result: "+decodedCaptcha)}
 
-		err = chromedp.Run(iParentCtx,
+		err = chromedp.Run(newChildContext,
 			chromedp.SendKeys(captchaStringInputID,decodedCaptcha,chromedp.ByID),
 			chromedp.Screenshot(
 				captchaPageImageBox,
-				&threatCaptchaBox1Bytes,
+				&threatCaptchaBoxAfterResolutionBytes,
 				chromedp.BySearch),
 			chromedp.Click(captchaStringButtonSubmitID,chromedp.ByID),
 			chromedp.WaitVisible(mainTorrentListPageSearchBarID,chromedp.ByID), //waiting to get redirected to main page
-			fullScreenShot(90, &threatCaptchaBox2Bytes), //here we should get to the main torrent list page
+			fullScreenShot(90, &threatCaptchaBoxAfterRedirectionBytes),         //here we should get to the main torrent list page
 		)
 
 		if utils.DebugActive{
-			if err := ioutil.WriteFile("captcha.png", threatCaptchaImageBytes, 0644); err != nil {
+			if err := ioutil.WriteFile("captcha.png", threatCaptchaBeforeResolutionImageBytes, 0644); err != nil {
 				utils.Logger.Error(err)
 			}
-			if err := ioutil.WriteFile("box1.png", threatCaptchaBox1Bytes, 0644); err != nil {
+			if err := ioutil.WriteFile("box1.png", threatCaptchaBoxAfterResolutionBytes, 0644); err != nil {
 				log.Fatal(err)
 			}
-			if err := ioutil.WriteFile("box2.png", threatCaptchaBox2Bytes, 0644); err != nil {
+			if err := ioutil.WriteFile("box2.png", threatCaptchaBoxAfterRedirectionBytes, 0644); err != nil {
 				log.Fatal(err)
 			}
 		}
