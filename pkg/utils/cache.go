@@ -5,6 +5,16 @@ import (
 	"time"
 )
 
+
+/*
+General purpose caching system, with support for custom "root" duration.
+
+A cache key is basically a string composed by a "root" and a "key".
+The root part is used to customize how different
+cache elements have to behave.
+*/
+
+
 type (
 	//map key ==> cacheElement
 	cache struct{
