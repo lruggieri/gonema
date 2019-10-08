@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Gonema</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="../static/css/jquery.qtip.min.css" />
+    <link rel="stylesheet" type="text/css" href="../static/slick/slick.css"/>
+    <link rel="stylesheet" type="text/css" href="../static/slick/slick-theme.css"/>
+    <link rel="stylesheet" type="text/css" href="../static/css/custom.css">
+</head>
+<body>
+
+
+
+<div id="div_logo" class="main_div">
+    <img id="img_logo" class="centered_image" src="../static/images/logo.png" />
+</div>
+
+<div id="div_search" class="main_div container-fluid">
+    <div class="row">
+        <div class="col-md-4 "></div>
+        <div class="col-md-4 ">
+            <form id="form_search" class="col-sm-12" role="form" method="post">
+                <div class="form-group row">
+                    <label class="col-md-12 custom_td">
+                        <input id="inputResourceName" class="form-control main-search-box" name="source_name" placeholder=" ">
+                        <span>Resource name</span>
+                    </label>
+                </div>
+                <div class="form-group row">
+                    <label class="col-md-12 custom_td">
+                        <input id="inputResourceImdbID" class="form-control main-search-box" name="source_imdbid" placeholder=" ">
+                        <span>Imdb ID</span>
+                    </label>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-12 custom_td">
+                        <input id="submit_main_form" type="submit" value="Search" name="submit" class="btn btn-primary"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-4 "></div>
+    </div>
+</div>
+
+<div class="main_div">
+
+    <div id="div_single_result" class="row child_image_container" style="display: none">
+        <div id="div_result_banner" class="col-md-2 child_image_container">
+            <img id="img_resource_banner" class="centered_image full_div_image" src="" />
+        </div>
+        <div id="div_result_info" class="col-md-4">
+            <div class="div_info_item">
+                <h4 class="inline">Title:</h4>
+                <a id="single_result_title"></a>
+            </div>
+            <div class="div_info_item">
+                <h4 class="inline">Year:</h4>
+                <a id="single_result_year"></a>
+            </div>
+            <div class="div_info_item">
+                <h4 class="inline">Categories:</h4>
+                <a id="single_result_categories"></a>
+            </div>
+            <div class="div_info_item">
+                <h4 class="inline">Stars:</h4>
+                <a id="single_result_stars"></a>
+            </div>
+            <div class="div_info_item">
+                <h4 class="inline">Directors:</h4>
+                <a id="single_result_directors"></a>
+            </div>
+        </div>
+        <div id="div_result_torrents" class="col-md-6">
+            {{/*Here we are going to insert every torent available, each in a proper DIV element*/}}
+        </div>
+    </div>
+
+    <div id="div_slideshow_results" class="row" style="display: none">
+
+    </div>
+
+</div>
+
+
+
+
+<script src="../static/js/jquery-3.4.1.min.js"></script>
+<script src="../static/js/jquery.qtip.min.js"></script>
+<script src="../static/js/notify.min.js"></script>
+<script src="../static/js/bootstrap.min.js"></script>
+<script src="../static/slick/slick.min.js"></script>
+<script src="../static/js/custom.js"></script>
+
+</body>
+</html>

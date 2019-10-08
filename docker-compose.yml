@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  visual_resource_api:
+    image: eu.gcr.io/gonema/gonemapi:latest
+    build:
+      context: ./
+      dockerfile: ./cmd/visualResourceServer/Dockerfile
+
+  website:
+    image: eu.gcr.io/gonema/gonemaweb:latest
+    build:
+      context: ./
+      dockerfile: ./website/Dockerfile

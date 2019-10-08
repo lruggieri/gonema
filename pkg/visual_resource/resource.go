@@ -30,9 +30,18 @@ func GetResource(iName, iImdbID string) (oResource Resource, oError error){
 
 	return &newResource, nil
 }
-type resource struct{
+func GetMockResource() *mockResource{
+	return &mockResource{}
+}
+
+type resourceImages struct {
+	Small string `json:"small"`
+	Big   string `json:"big"`
+}
+type resource struct {
 	ImdbID            string            `json:"imdb_id"`
-	ImdbScore         float64           `json:"imdb_score"`//out of 10
+	Images            resourceImages    `json:"images"`
+	ImdbScore         float64           `json:"imdb_score"` //out of 10
 	Name              string            `json:"title"`
 	Year              int               `json:"year"`
 	ReleaseDate       time.Time         `json:"release_date"`
@@ -72,4 +81,36 @@ func(r *resource) setTorrentInfo() error{
 
 	r.AvailableTorrents = torrentInfo
 	return nil
+}
+
+type mockResource struct{
+	resource
+}
+func (mr *mockResource) SetImdbID(iImdbID string) *mockResource{
+	mr.ImdbID = iImdbID
+
+	return mr
+}
+func (mr *mockResource) SetImages(iSmallImage, iBigImage string) *mockResource{
+	mr.Images.Small = iSmallImage
+	mr.Images.Big = iBigImage
+
+	return mr
+}
+func (mr *mockResource) SetImdbScore(iImdbScore float64) *mockResource       { mr.ImdbScore = iImdbScore; return mr }
+func (mr *mockResource) SetName(iName string) *mockResource                  { mr.Name = iName; return mr }
+func (mr *mockResource) SetYear(iYear int) *mockResource                     { mr.Year = iYear; return mr }
+func (mr *mockResource) SetReleaseDate(iReleaseDate time.Time) *mockResource { mr.ReleaseDate = iReleaseDate; return mr }
+func (mr *mockResource) SetCategories(iCategories []string) *mockResource    { mr.Categories = iCategories; return mr }
+func (mr *mockResource) SetPlot(iPlot string) *mockResource                  { mr.Plot = iPlot; return mr }
+func (mr *mockResource) SetStars(iStars []string) *mockResource              { mr.Stars = iStars; return mr }
+func (mr *mockResource) SetWriters(iWriters []string) *mockResource          { mr.Writers = iWriters; return mr }
+func (mr *mockResource) SetDirectors(iDirectors []string) *mockResource      { mr.Directors = iDirectors; return mr }
+func (mr *mockResource) SetAvailableTorrents(iAvailableTorrents []torrent.Torrent) *mockResource{
+	mr.AvailableTorrents = iAvailableTorrents
+	return mr
+}
+func (mr *mockResource) SetAvailableTorrent(iAvailableTorrent torrent.Torrent) *mockResource{
+	mr.AvailableTorrents = append(mr.AvailableTorrents, iAvailableTorrent)
+	return mr
 }
