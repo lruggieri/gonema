@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"gitlab.com/ruggieri/gonema/pkg/utils"
-	"gitlab.com/ruggieri/gonema/pkg/visual_resource"
 	"gitlab.com/ruggieri/gonema/website/controller"
 	"html/template"
 	"log"
@@ -161,9 +160,9 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) *internalE
 
 
 type resourceInfoResponse struct{
-	Resources []visual_resource.Resource `json:"resources"`
+	Resources interface{} `json:"resources"`
 }
-func respondResourceInfo(w http.ResponseWriter, iResponseResources []visual_resource.Resource){
+func respondResourceInfo(w http.ResponseWriter, iResponseResources interface{}){
 
 	w.Header().Set("content-type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")

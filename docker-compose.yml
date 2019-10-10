@@ -1,14 +1,29 @@
-version: '3'
+version: '3.0'
 
 services:
-  visual_resource_api:
+  gonemapi:
     image: eu.gcr.io/gonema/gonemapi:latest
     build:
       context: ./
       dockerfile: ./cmd/visualResourceServer/Dockerfile
+    ports:
+      - 8080:8080
 
-  website:
+  gonemaweb:
     image: eu.gcr.io/gonema/gonemaweb:latest
     build:
       context: ./
       dockerfile: ./website/Dockerfile
+    ports:
+      - 8080:8080
+
+#  test:
+        ##    image: test
+        ##    build:
+        ##      context: .
+        ##      dockerfile: testing/Dockerfile
+        ##    ports:
+        ##      - 8080:8080
+        ##    volumes:
+      ##      - ./testing:/go/testing
+      ##      - ./prova:/go/prova

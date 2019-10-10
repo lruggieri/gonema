@@ -3,35 +3,33 @@ FROM centos:7
 # Add Maintainer Info
 LABEL maintainer="Luca Ruggieri <luc4.ruggieri@gmail.com>"
 
-#useful for 'install.sh' colored output ^^
-ENV TERM=xterm
+WORKDIR /web
 
+# gcc and g++ are necessary for gosseract and underling libraries
+RUN yum install -y wget
+RUN yum install -y git
 
-# Set the Current Working Directory inside the container
-WORKDIR /app
+# install go
+RUN wget https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz && \
+    tar -xzf go1.12.7.linux-amd64.tar.gz && \
+    mv go /usr/local
 
-RUN yum install sudo -y
+# put here every other package to install
+# RUN yum install something_else
 
-# Copy go mod and sum files
+ENV GOROOT='/usr/local/go'
+ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
+COPY configs configs
+COPY pkg/utils pkg/utils
 COPY go.mod go.sum ./
+COPY .env ./
 
-# Copy the source from the current directory to the Working Directory inside the container
-COPY scripts ./scripts
-RUN chmod +x scripts/*
-
-RUN ./scripts/installEnvironment.sh
-
-ENV GOROOT "/usr/local/go"
-ENV PATH "$GOPATH/bin:$GOROOT/bin:$PATH"
-
-# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
 RUN go mod download
+RUN go mod vendor
 
-# Copy everything else in the Working Directory
-COPY . .
+COPY website website
 
-RUN chmod +x scripts/installDependencies.sh
-RUN ./scripts/installDependencies.sh
 
 # Build visualResourceServer app
 RUN go build -o gonemaweb website/main.go

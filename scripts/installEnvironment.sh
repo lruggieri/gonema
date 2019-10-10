@@ -57,11 +57,33 @@ installGO () {
     return 0
 }
 
-OS="$(/bin/bash $DIR/getOS.sh)"
-
+OS=$(getOS)
 
 if isDistro "$OS" "${DISTRO_REDHAT[@]}"; then
     shw_info "Red Hat distribution '$OS' detected"
+
+
+    if ! command -v sudo >/dev/bull2>&1 ; then
+        yum install -y sudo
+
+        if command -v sudo >/dev/null 2>&1  ; then
+            shw_info "sudo installed"
+        else
+            shw_err "cannot install sudo"
+            exit 1
+        fi
+    fi
+
+    if ! command -v curl >/dev/bull2>&1 ; then
+        yum install -y curl
+
+        if command -v curl >/dev/null 2>&1  ; then
+            shw_info "curl installed"
+        else
+            shw_err "cannot install curl"
+            exit 1
+        fi
+    fi
 
     # check and eventually install git
     if command -v git >/dev/null 2>&1  ; then
@@ -119,8 +141,41 @@ if isDistro "$OS" "${DISTRO_REDHAT[@]}"; then
         shw_info "tesseract with leptonica installed"
     fi
 
+    #Google chrome is needed as the main tool used by chromedp to scrape the web
+    if command -v google-chrome >/dev/null 2>&1  ; then
+        shw_norm "Google Chrome already installed"
+    else
+        shw_norm "Installing Google Chrome"
+        curl https://intoli.com/install-google-chrome.sh | bash
+        shw_info "Google Chrome installed"
+
+    fi
+
 elif isDistro "$OS" "${DISTRO_UBUNTU[@]}"; then
-    shw_info "Ubuntu distribution '$OS' detected"
+   shw_info "Ubuntu distribution '$OS' detected"
+
+
+   if ! command -v sudo >/dev/bull2>&1 ; then
+        apt-get update ; apt-get -y install sudo
+
+        if command -v sudo >/dev/null 2>&1  ; then
+            shw_info "sudo installed"
+        else
+            shw_err "cannot install sudo"
+            exit 1
+        fi
+   fi
+
+   if ! command -v curl >/dev/bull2>&1 ; then
+        apt-get update ; apt-get -y install curl
+
+        if command -v curl >/dev/null 2>&1  ; then
+            shw_info "curl installed"
+        else
+            shw_err "cannot install curl"
+            exit 1
+        fi
+   fi
 
     # check and eventually install git
     if command -v git >/dev/null 2>&1  ; then
@@ -168,6 +223,18 @@ elif isDistro "$OS" "${DISTRO_UBUNTU[@]}"; then
         shw_info "tesseract with leptonica installed"
     fi
 
+    #Google chrome is needed as the main tool used by chromedp to scrape the web
+    if command -v google-chrome >/dev/null 2>&1  ; then
+        shw_norm "Google Chrome already installed"
+    else
+
+        shw_norm "Installing Google Chrome"
+        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
+        shw_info "Google Chrome installed"
+
+    fi
+
 else
     shw_err "Distribution $OS not recognized. Aborting."
     exit 1
@@ -175,14 +242,4 @@ fi
 
 if ! installGO ; then
     exit 1
-fi
-
-#Google chrome is needed as the main tool used by chromedp to scrape the web
-if command -v google-chrome >/dev/null 2>&1  ; then
-    shw_norm "Google Chrome already installed"
-else
-    shw_norm "Installing Google Chrome"
-    curl https://intoli.com/install-google-chrome.sh | bash
-    shw_info "Google Chrome installed"
-
 fi
