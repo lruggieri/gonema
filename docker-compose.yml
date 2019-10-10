@@ -8,6 +8,10 @@ services:
       dockerfile: ./cmd/visualResourceServer/Dockerfile
     ports:
       - 8080:8080
+    volumes:
+      - ./pkg:/visualResourceServer/pkg
+      - ./cmd/visualResourceServer:/visualResourceServer/cmd/visualResourceServer
+      - ./configs:/visualResourceServer/configs
 
   gonemaweb:
     image: eu.gcr.io/gonema/gonemaweb:latest
@@ -16,6 +20,10 @@ services:
       dockerfile: ./website/Dockerfile
     ports:
       - 8080:8080
+    volumes:
+      - ./pkg:/web/pkg
+      - ./website:/web/website
+      - ./configs:/web/configs
 
 #  test:
         ##    image: test
