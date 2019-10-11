@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/joho/godotenv"
 	"gitlab.com/ruggieri/gonema/pkg/utils"
 	"gitlab.com/ruggieri/gonema/website/controller"
 	"html/template"
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -54,10 +52,6 @@ func (nfs neuteredFileSystem) Open(path string) (http.File, error) {
 
 
 func main() {
-	err := godotenv.Load(path.Join(environmentDir,".env"),path.Join(environmentDir,"certs.env"))
-	if err != nil {
-		log.Fatal("Error loading .env file: "+err.Error()+". Please make sure you created a certs.env file")
-	}
 	templatesDir = os.Getenv("TEMPLATES_DIR")
 	staticAssetDir = os.Getenv("STATIC_ASSET_DIR")
 
@@ -72,12 +66,17 @@ func main() {
 	var tlsKeyPath = os.Getenv("TLS_KEY_PATH")
 
 	if len(tlsCertPath) > 0 && len(tlsKeyPath) > 0{
-		err = http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, nil)
+		err := http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, nil)
 		if err != nil{
 			panic(err)
 		}
 	}else{
-		err = http.ListenAndServe(":8080",mux)
+		port := os.Getenv("PORT")
+		if len(port) == 0{
+			port = "8080"
+		}
+		fmt.Println("web service starting on port "+port)
+		err := http.ListenAndServe(fmt.Sprintf(":%s",port),mux)
 		if err != nil{
 			panic(err)
 		}

@@ -14,21 +14,28 @@ type Resource interface{
 
 
 	setInfo() error
-	setTorrentInfo() error
 }
-func GetResource(iName, iImdbID string) (oResource Resource, oError error){
+func GetResources(iName, iImdbID string) (oResource Resource, oError error){
 
-	newResource :=  resource{
-		ImdbID: iImdbID,
-		Name:   iName,
+	resultingResources := resources{
+		Resources:make([]resource,0),
+	}
+	if len(iImdbID) > 0{
+		resultingResources.Resources = append(resultingResources.Resources, resource{
+			ImdbID:iImdbID,
+		})
+
+		err := resultingResources.setInfo()
+		if err != nil{
+			return nil, err
+		}
+	}else{
+		//TODO
+		//search for resources with this name, or similar, and get slice of corresponding ImdbID
+		//then for each ImdbID create a resource and set info
 	}
 
-	err := newResource.setInfo()
-	if err != nil{
-		return nil,err
-	}
-
-	return &newResource, nil
+	return &resultingResources, nil
 }
 func GetMockResource() *mockResource{
 	return &mockResource{}
@@ -38,6 +45,27 @@ type resourceImages struct {
 	Small string `json:"small"`
 	Big   string `json:"big"`
 }
+type resources struct{
+	Resources []resource `json:"resources"`
+}
+func (rs *resources) Json() string{
+	jsonResource, err := json.Marshal(rs)
+	if err != nil{
+		return ""
+	}
+	return string(jsonResource)
+}
+func (rs *resources) setInfo() error{
+	for _,r := range rs.Resources{
+		err := r.setInfo()
+		if err != nil{
+			return err
+		}
+	}
+	return nil
+}
+
+
 type resource struct {
 	ImdbID            string            `json:"imdb_id"`
 	Images            resourceImages    `json:"images"`
@@ -53,11 +81,11 @@ type resource struct {
 	AvailableTorrents []torrent.Torrent `json:"available_torrents"`
 }
 func(r *resource) Json() string{
-	jsonMovie, err := json.Marshal(r)
+	jsonResource, err := json.Marshal(r)
 	if err != nil{
 		return ""
 	}
-	return string(jsonMovie)
+	return string(jsonResource)
 }
 func(r *resource) setInfo() error{
 

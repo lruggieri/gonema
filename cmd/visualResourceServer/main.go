@@ -57,7 +57,7 @@ func resourceInfo(w http.ResponseWriter, r *http.Request){
 		if cachedResult := localCache.Fetch(resourceImdbIDElementCacheKey, utils.CacheElementKey(imdbID)) ; cachedResult != nil{
 			respond(w,http.StatusOK,[]byte(cachedResult.(string)))
 		}else{
-			resource,err := visual_resource.GetResource("",imdbID)
+			resource,err := visual_resource.GetResources("",imdbID)
 			resourceJson := resource.Json()
 			if err != nil{
 				dealWithInternalError(w,err)
