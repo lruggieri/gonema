@@ -1,0 +1,16 @@
+{
+  "mappings": {
+    "properties": {
+      "suggest": {
+        "type": "completion"
+      },
+      "name": {
+        "type": "keyword",
+        "copy_to": "suggest"
+      },
+      "url": {
+        "type": "keyword"
+      }
+    }
+  }
+}

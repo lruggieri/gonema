@@ -12,6 +12,8 @@ services:
       - ./pkg:/visualResourceServer/pkg
       - ./cmd/visualResourceServer:/visualResourceServer/cmd/visualResourceServer
       - ./configs:/visualResourceServer/configs
+    environment:
+      - GONEMAES_HOST=http://gonemaes
 
   gonemaweb:
     ports:

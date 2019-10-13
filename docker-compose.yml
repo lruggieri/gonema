@@ -8,6 +8,8 @@ services:
     build:
       context: ./
       dockerfile: ./cmd/visualResourceServer/Dockerfile
+    environment:
+      - GONEMAES_HOST=https://gonemaes.ruggieri.tech
 
   gonemaweb:
     image: eu.gcr.io/gonema/gonemaweb:latest
@@ -19,3 +21,29 @@ services:
       - STATIC_ASSET_DIR=website/static
       - GONEMAPI_HOST=https://gonemapi.ruggieri.tech
     restart: always
+
+  gonemaes:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
+    container_name: gonemaes
+    environment:
+      - node.name=es01
+      - cluster.initial_master_nodes=es01
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - esnet
+
+volumes:
+  esdata01:
+    driver: local
+networks:
+  esnet:
