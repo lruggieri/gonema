@@ -20,14 +20,12 @@ RUN wget https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz && \
 ENV GOROOT='/usr/local/go'
 ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-COPY configs configs
+
 COPY pkg/utils pkg/utils
 COPY go.mod go.sum ./
-COPY .env ./
-
 RUN go mod download
 RUN go mod vendor
-
+COPY configs configs
 COPY website website
 
 
@@ -36,6 +34,11 @@ RUN go build -o gonemaweb website/main.go
 
 # Expose port 8080 to the outside world
 EXPOSE 8080
+
+#ENV TEMPLATES_DIR=website/templates
+#ENV STATIC_ASSET_DIR=website/static
+#ENV GONEMAPI_HOST=gonemapi.ruggieri.tech
+#ENV GONEMAPI_PORT=8080
 
 # Command to run visualResourceServer
 CMD ["./gonemaweb"]

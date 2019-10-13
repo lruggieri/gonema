@@ -8,6 +8,9 @@ html {
 .main_div {
     height: 33%;
 }
+.div_result {
+    word-wrap: break-word;
+}
 .child_image_container{
     height: 100%;
     width: 100%;

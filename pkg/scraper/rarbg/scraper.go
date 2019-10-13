@@ -61,7 +61,7 @@ func getScraperRoundRobin() context.Context{
 type Scraper struct{}
 
 /*
-TODO implement name usage ('/torrents.php?search=...')
+TODO implement name usage ('?search=...')
 */
 func (sc *Scraper)GetTorrentLinks(iResourceName, iResourceImdbID string) (oTorrents []torrent.Torrent, oErr error){
 	mainDomain := "https://rarbgunblock.com"
@@ -101,42 +101,172 @@ func (sc *Scraper)GetTorrentLinks(iResourceName, iResourceImdbID string) (oTorre
 	//TODO possibly use goroutines. Unsure about the chance of getting banned for too much speed though.
 	for _,specificTorrentLinkToCrawl := range specificTorrentLinksToCrawl{
 		specificTorrentPage := mainDomain+specificTorrentLinkToCrawl
-		err = navigateWithCaptchaDetection(randMainCtx, specificTorrentPage)
-		if err != nil{
-			return nil,err
-		}
-		magnetNodes := make([]*cdp.Node,0)
-		timeout,err = executeRunWithTimeout(randMainCtx,
-			1*time.Second,
-			/*chromedp.ActionFunc(func(ctx context.Context) error {
 
-				//
-			}),*/
-			chromedp.Nodes(specificTorrentPageMagnet, &magnetNodes, chromedp.ByQueryAll),
-		)
-		if timeout{
-			//TODO log better with Logstash
-			utils.Logger.Error(errors.New("timeout when fetching data for torrent page "+specificTorrentPage+ ", continuing..."))
-			continue
-		}
+		resultingTorrent, err := sc.getSinglePageTorrentInfo(randMainCtx, specificTorrentPage)
 		if err != nil{
-			return nil,err
-		}
-		magnetLinkString := magnetNodes[0].AttributeValue("href")
-		magnetLink, err := magneturi.Parse(magnetLinkString,false)
-		if err != nil{
-			return nil,err
+			return nil, err
 		}
 
-		finalTorrents = append(finalTorrents, torrent.Torrent{
-			MagnetLink:*magnetLink, //let's bring along pointers when not needed please! Have mercy for the heap!
-		})
+		if resultingTorrent != nil{
+			finalTorrents = append(finalTorrents, *resultingTorrent)
+		}
+
 	}
 
 
 	return finalTorrents,nil
 }
+func (sc *Scraper) getSinglePageTorrentInfo(iCtx context.Context, iSpecificTorrentPage string) (oFinalTorrents *torrent.Torrent, oErr error){
+	err := navigateWithCaptchaDetection(iCtx, iSpecificTorrentPage)
+	if err != nil{
+		return nil,err
+	}
+	nameNodes := make([]*cdp.Node,0)
+	tableElementsNodes := make([]*cdp.Node,0)
+	timeout,err := executeRunWithTimeout(iCtx,
+		1*time.Second,
+		/*chromedp.ActionFunc(func(ctx context.Context) error {
 
+			//
+		}),*/
+		chromedp.Nodes(specificTorrentPageName, &nameNodes, chromedp.ByQueryAll),
+		chromedp.Nodes(specificTorrentPageTableElements, &tableElementsNodes, chromedp.BySearch),
+	)
+	if timeout{
+		//TODO log better with Logstash
+		utils.Logger.Error(errors.New("timeout when fetching data for torrent page "+iSpecificTorrentPage+ ", continuing..."))
+		return nil, nil
+	}
+	if err != nil{
+		return nil,err
+	}
+	torrentName := getNodeText(nameNodes[0])
+
+	var torrentSize string
+	var torrentSeeders, torrentLeechers int
+	var torrentMagnetLink magneturi.MagnetURI
+	var torrentResolution, torrentSound, torrentCodec, torrentQuality string
+	var torrentLength string
+	var torrentSubtitles string
+
+	//from an child element of a standard table row (which is a <tr> with 2 <td> children), return the 2 parent's children
+	getStandardInfoRowChildren := func(iChild *cdp.Node) (oParentChildren []*cdp.Node){
+		parent := iChild.Parent
+		if parent != nil{
+			if len(parent.Children) == 2{
+				return parent.Children
+			}
+		}
+		return nil
+	}
+	for _,mainTableRow := range tableElementsNodes{
+		//these nodes always have 2 <td> children. The first with the row name, the second with the row data
+		rowName := strings.TrimSpace(getNodeText(mainTableRow))
+		switch strings.ToLower(rowName){
+		case "torrent:":{
+			parentChildren := getStandardInfoRowChildren(mainTableRow)
+			if parentChildren != nil{
+				torrentContainerNode := parentChildren[1]
+				if len(torrentContainerNode.Children) == 4{
+					torrentMagnetLinkString := torrentContainerNode.Children[2].AttributeValue("href")
+					magnetLink, err := magneturi.Parse(torrentMagnetLinkString,false)
+					if err != nil{
+						return nil, err
+					}
+					torrentMagnetLink = *magnetLink
+				}
+			}
+		}
+		case "size:":{
+			parentChildren := getStandardInfoRowChildren(mainTableRow)
+			if parentChildren != nil{
+				torrentSize = getNodeText(parentChildren[1])
+			}
+		}
+		case "peers:":{
+			parentChildren := getStandardInfoRowChildren(mainTableRow)
+			if parentChildren != nil{
+				torrentSeedersLeechers := getNodeText(parentChildren[1])
+				if len(torrentSeedersLeechers) > 0{
+					//parsing seeders/leechers string
+					//format: 'Seeders : 6182 , Leechers : 2544 = 8726'
+					seedersLeechersSplit := strings.Split(torrentSeedersLeechers,",")
+					if len(seedersLeechersSplit) == 2{
+						seedersSplit := strings.Split(seedersLeechersSplit[0],":")
+						if len(seedersSplit) == 2{
+							seedersString := strings.TrimSpace(seedersSplit[1])
+							if seedersInt, err := strconv.Atoi(seedersString); err == nil {
+								torrentSeeders = seedersInt
+							}
+						}
+						leechersSplit := strings.Split(seedersLeechersSplit[1],":")
+						if len(leechersSplit) == 2{
+							leechersTotal := leechersSplit[1] // 2544 = 8726
+							leechersTotalSplit := strings.Split(leechersTotal,"=")
+							if len(leechersTotalSplit) == 2{
+								leechersString := strings.TrimSpace(leechersTotalSplit[0])
+								if leechersInt, err := strconv.Atoi(leechersString); err == nil {
+									torrentLeechers = leechersInt
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		case "description:":{
+			parentChildren := getStandardInfoRowChildren(mainTableRow)
+			if parentChildren != nil {
+				descriptionNode := parentChildren[1]
+
+				//SPARKS only decoding
+				for _,descriptionPartNode := range descriptionNode.Children{
+					if descriptionPartNode.NodeType == cdp.NodeTypeText{
+						//every description part is formatted as 'PartName.......: PartValue'
+						descriptionPartNodeElements := strings.Split(descriptionPartNode.NodeValue,":")
+						if len(descriptionPartNodeElements) == 2{
+							elementTitle := strings.TrimSpace(strings.Trim(descriptionPartNodeElements[0],"."))
+							elementValue := strings.TrimSpace(strings.Trim(descriptionPartNodeElements[1],".\n"))
+							switch strings.ToLower(elementTitle){
+							case "resolution":{torrentResolution = elementValue}
+							case "audio":{torrentSound = elementValue}
+							case "source":{torrentQuality = elementValue}
+							case "video":{torrentCodec = elementValue}
+							case "length":{torrentLength = elementValue}
+							case "subtitles":{torrentSubtitles = elementValue}
+							}
+						}
+					}
+				}
+			}
+		}
+		}
+	}
+
+
+	return &torrent.Torrent{
+		Name:       torrentName,
+		Size:       torrentSize,
+		MagnetLink: torrentMagnetLink, //let's bring along pointers when not needed please! Have mercy for the heap!
+		Seeders:torrentSeeders,
+		Leechers:torrentLeechers,
+		Quality:torrentQuality,
+		Codec:torrentCodec,
+		Sound:torrentSound,
+		Resolution:torrentResolution,
+		Length:torrentLength,
+		Subtitles:torrentSubtitles,
+	}, nil
+}
+//return node text if present, empty string otherwise
+func getNodeText(iNode *cdp.Node) string{
+	for _,childNode := range iNode.Children{
+		if childNode.NodeType == cdp.NodeTypeText{
+			return childNode.NodeValue
+		}
+	}
+	return ""
+}
 
 /*
 Remember to pass cookies in the format key1,value1,...keyN,valueN. So they must be an even number

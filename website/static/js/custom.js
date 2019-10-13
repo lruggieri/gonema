@@ -116,8 +116,28 @@ $( document ).ready(function() {
                                         newTorrentDiv.append(infoItemDiv);
 
                                         infoItemDiv = $('<div class="div_info_item"></div>');
+                                        infoItemDiv.append($('<h4 class="inline">Length:</h4>'));
+                                        infoItemDiv.append($('<a">'+value["length"]+'</a>'));
+                                        newTorrentDiv.append(infoItemDiv);
+
+                                        infoItemDiv = $('<div class="div_info_item"></div>');
                                         infoItemDiv.append($('<h4 class="inline">Resolution:</h4>'));
                                         infoItemDiv.append($('<a">'+value["resolution"]+'</a>'));
+                                        newTorrentDiv.append(infoItemDiv);
+
+                                        infoItemDiv = $('<div class="div_info_item"></div>');
+                                        infoItemDiv.append($('<h4 class="inline">Size:</h4>'));
+                                        infoItemDiv.append($('<a">'+value["size"]+'</a>'));
+                                        newTorrentDiv.append(infoItemDiv);
+
+                                        infoItemDiv = $('<div class="div_info_item"></div>');
+                                        infoItemDiv.append($('<h4 class="inline">Sound:</h4>'));
+                                        infoItemDiv.append($('<a">'+value["sound"]+'</a>'));
+                                        newTorrentDiv.append(infoItemDiv);
+
+                                        infoItemDiv = $('<div class="div_info_item"></div>');
+                                        infoItemDiv.append($('<h4 class="inline">Codec:</h4>'));
+                                        infoItemDiv.append($('<a">'+value["codec"]+'</a>'));
                                         newTorrentDiv.append(infoItemDiv);
 
                                         infoItemDiv = $('<div class="div_info_item"></div>');

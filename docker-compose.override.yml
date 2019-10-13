@@ -22,5 +22,5 @@ services:
       - ./website:/web/website
       - ./configs:/web/configs
     environment:
-      - GONEMAPI_HOST=gonemapi
+      - GONEMAPI_HOST=http://gonemapi
       - GONEMAPI_PORT=8080 # using default internal network

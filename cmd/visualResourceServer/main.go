@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/ruggieri/gonema/pkg/utils"
 	"gitlab.com/ruggieri/gonema/pkg/visual_resource"
@@ -24,11 +23,6 @@ var(
 func main(){
 	utils.DebugActive = true
 	utils.Logger.Level = logrus.DebugLevel
-
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file: "+err.Error()+"")
-	}
 
 	localCache.SetNewRootElementDuration(resourceImdbIDElementCacheKey, time.Hour)
 	localCache.SetNewRootElementDuration(resourceNameElementCacheKey, 2 * time.Minute)

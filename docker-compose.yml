@@ -17,6 +17,5 @@ services:
     environment:
       - TEMPLATES_DIR=website/templates
       - STATIC_ASSET_DIR=website/static
-      - GONEMAPI_HOST=gonemapi.ruggieri.tech
-      - GONEMAPI_PORT=8080
+      - GONEMAPI_HOST=https://gonemapi.ruggieri.tech
     restart: always

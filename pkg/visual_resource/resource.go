@@ -18,10 +18,10 @@ type Resource interface{
 func GetResources(iName, iImdbID string) (oResource Resource, oError error){
 
 	resultingResources := resources{
-		Resources:make([]resource,0),
+		Resources:make([]*resource,0),
 	}
 	if len(iImdbID) > 0{
-		resultingResources.Resources = append(resultingResources.Resources, resource{
+		resultingResources.Resources = append(resultingResources.Resources, &resource{
 			ImdbID:iImdbID,
 		})
 
@@ -46,7 +46,7 @@ type resourceImages struct {
 	Big   string `json:"big"`
 }
 type resources struct{
-	Resources []resource `json:"resources"`
+	Resources []*resource `json:"resources"`
 }
 func (rs *resources) Json() string{
 	jsonResource, err := json.Marshal(rs)
@@ -88,6 +88,9 @@ func(r *resource) Json() string{
 	return string(jsonResource)
 }
 func(r *resource) setInfo() error{
+
+	//TODO fetch real information
+	r.Images = resourceImages{Big:"https://cdn.suwalls.com/wallpapers/movies/marvin-15227-1920x1200.jpg"}
 
 	err := r.setTorrentInfo()
 	if err != nil{

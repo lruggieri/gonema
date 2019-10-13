@@ -29,15 +29,14 @@ RUN wget https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz && \
 ENV GOROOT='/usr/local/go'
 ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-
-COPY cmd/visualResourceServer cmd/visualResourceServer
 COPY configs configs
-COPY pkg pkg
 COPY go.mod go.sum ./
-COPY .env ./
 
 RUN go mod download
 RUN go mod vendor
+
+COPY cmd/visualResourceServer cmd/visualResourceServer
+COPY pkg pkg
 
 # Build visualResourceServer app
 RUN go build -o visualResourceServer cmd/visualResourceServer/main.go

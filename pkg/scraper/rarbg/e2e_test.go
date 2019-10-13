@@ -4,14 +4,16 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/nmmh/magneturi/magneturi"
 	"github.com/sirupsen/logrus"
-	"gonema/torrent"
-	"gonema/utils"
+	"gitlab.com/ruggieri/gonema/pkg/torrent"
+	"gitlab.com/ruggieri/gonema/pkg/utils"
 	"testing"
 )
 
 func TestEndToEnd(t *testing.T) {
 	utils.DebugActive = true
 	utils.Logger.Level = logrus.DebugLevel
+
+	scraper := Scraper{}
 
 	type test struct{
 		imdbID string
@@ -56,7 +58,7 @@ func TestEndToEnd(t *testing.T) {
 	}
 
 	for tstIdx,tst := range tests{
-		finalTorrents,err := GetTorrentLinks("",tst.imdbID)
+		finalTorrents,err := scraper.GetTorrentLinks("",tst.imdbID)
 		if err != nil{
 			t.Error(err)
 			t.FailNow()

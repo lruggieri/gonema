@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/chromedp"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/sirupsen/logrus"
-	"gonema/utils"
+	"gitlab.com/ruggieri/gonema/pkg/utils"
 	"os"
 	"path"
 	"testing"
@@ -94,6 +95,7 @@ func TestTorrentTitleSelection(t *testing.T){
 
 
 func TestMainFilmPageInfoSelection(t *testing.T){
+	scraper := Scraper{}
 	ctx, cancel := chromedp.NewContext(context.Background(),
 		//chromedp.WithDebugf(log.Printf),
 	)
@@ -116,19 +118,17 @@ func TestMainFilmPageInfoSelection(t *testing.T){
 		t.FailNow()
 	}
 	fmt.Println("Navigated")
-	var nodes []*cdp.Node
-	err = chromedp.Run(ctx,
-		chromedp.Nodes(
-			`html > body > table:nth-child(3) > tbody > 
-					tr:nth-child(1) > td:nth-child(2) > div > table > tbody > tr:nth-child(2) > 
-					td:nth-child(1) > div > table > tbody > tr:nth-child(1) > td:nth-child(2) > a:nth-child(3)`, &nodes, chromedp.ByQueryAll,
-		),
-	)
 
-	expectedNodesLength := 1
-	if len(nodes) != expectedNodesLength{
-		t.Error("Expected nodes len to be ",expectedNodesLength)
+	resultingTorrent, err := scraper.getSinglePageTorrentInfo(ctx,testFilePath)
+
+	if err != nil{
+		t.Error(err)
 		t.FailNow()
 	}
-	fmt.Println(nodes[0].AttributeValue("href"))
+
+	if resultingTorrent == nil{
+		t.Error("no torrent could be fetched")
+		t.FailNow()
+	}
+	spew.Dump(resultingTorrent)
 }

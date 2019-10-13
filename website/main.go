@@ -13,10 +13,6 @@ import (
 	"path/filepath"
 )
 
-const(
-	environmentDir = "configs/env"
-)
-
 var(
 	templatesDir string
 	staticAssetDir string
@@ -157,16 +153,12 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) *internalE
 	}
 }
 
-
-type resourceInfoResponse struct{
-	Resources interface{} `json:"resources"`
-}
 func respondResourceInfo(w http.ResponseWriter, iResponseResources interface{}){
 
 	w.Header().Set("content-type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusOK)
 
-	encodeError := json.NewEncoder(w).Encode(resourceInfoResponse{Resources:iResponseResources})
+	encodeError := json.NewEncoder(w).Encode(iResponseResources)
 	dealWithEncodingError(w,encodeError)
 }
