@@ -33,7 +33,7 @@ sudo ./scripts/install_dependencies.sh
 ```
 
 #### DOCKER
-Docker for this project is available in Goggle Cloud Container Registry under '[eu.gcr.io/gonema/gonema](eu.gcr.io/gonema/gonema)'
+Docker for this project is available in Goggle Cloud Container Registry under '[eu.gcr.io/gonema/gonema](https://console.cloud.google.com/gcr/images/gonema)'
 
 
 #### API
