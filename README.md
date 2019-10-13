@@ -36,28 +36,18 @@ sudo ./scripts/install_dependencies.sh
 Docker for this project is available in Goggle Cloud Container Registry under '[eu.gcr.io/gonema/gonema](eu.gcr.io/gonema/gonema)'
 
 
-#### API ACCESS
-Access to this API is available at [https://gonemapi.ruggieri.tech](https://gonemapi.ruggieri.tech)
-
-
-#### USAGE
-At this moment resources can be retrieved only through *imdbID*
-
-`/resourceInfo?imdbID=tt6146586`
-
-no local database is implemented at the moment, and the first search for each new *imdbID* can possibly
-take some time to be fetched (due to captcha recognition and general crawling) but subsequent request
-on the same *imdbID* should take much less time, due to caching mechanism.
-Only Torrent information is returned at the moment.
+#### API
+* Resource info: access to this API is available at [https://gonemapi.ruggieri.tech](https://gonemapi.ruggieri.tech)
+    * Documentation for this API [available here](cmd/visualResourceServer/README.md)
 
 #### TODO LIST (working on bolded)
 - [X] Finalize a first version of the API, capable of returning basic information
 about the searched movie
 - [X] Build Docker image
 - [X] Deploy on cloud
-- [ ] **Build a minimal website version in order to use the API**
+- [X] Build a minimal website version in order to use the API
+- [ ] **Create a local DB using ElasticSearch**
 - [ ] Improve the API. Add Movie information from Imdb, possibly using their API
 - [ ] Implement CI (+ Docker integration)
-- [ ] Create a local DB using ElasticSearch
-- [ ] Improve website with more complex JS
+- [ ] Improve website with more complex JS and CSS
 - [ ] Integrate with Slack interactive commands

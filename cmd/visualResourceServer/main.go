@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/ruggieri/gonema/pkg/utils"
 	"gitlab.com/ruggieri/gonema/pkg/visual_resource"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -29,7 +31,13 @@ func main(){
 	mux.HandleFunc("/",emptyRequest)
 	mux.HandleFunc("/resourceInfo",resourceInfo)
 
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	port := os.Getenv("VRS_PORT")
+	if port == "" {
+		port = "8080"
+	}
+	utils.Logger.Info("running API on port "+port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), mux))
+
 }
 
 
@@ -43,7 +51,7 @@ func resourceInfo(w http.ResponseWriter, r *http.Request){
 		if cachedResult := localCache.Fetch(resourceImdbIDElementCacheKey, utils.CacheElementKey(imdbID)) ; cachedResult != nil{
 			respond(w,http.StatusOK,[]byte(cachedResult.(string)))
 		}else{
-			resource,err := visual_resource.GetResource("",imdbID)
+			resource,err := visual_resource.GetResources("",imdbID)
 			resourceJson := resource.Json()
 			if err != nil{
 				dealWithInternalError(w,err)

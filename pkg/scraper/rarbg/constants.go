@@ -17,6 +17,7 @@ const mainTorrentListPageSearchBarID = `#searchinput`
 const mainTorrentListPageLinks = `tr[class="lista2"] > td:nth-child(2) > a:nth-child(1)`
 
 //SPECIFIC TORRENT PAGE
-const specificTorrentPageMagnet = `html > body > table:nth-child(6) > tbody > 
-					tr:nth-child(1) > td:nth-child(2) > div > table > tbody > tr:nth-child(2) > 
-					td:nth-child(1) > div > table > tbody > tr:nth-child(1) > td:nth-child(2) > a:nth-child(3)`
+const specificTorrentPageName = `html > body > table:nth-child(6) > tbody > 
+					tr:nth-child(1) > td:nth-child(2) > div > table > tbody > tr:nth-child(1) > 
+					td > b > h1`
+const specificTorrentPageTableElements = `html/body/table[3]/tbody/tr[1]/td[2]/div/table/tbody/tr[2]/td[1]/div/table/tbody/tr//*`

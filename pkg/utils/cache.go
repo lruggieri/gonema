@@ -5,6 +5,16 @@ import (
 	"time"
 )
 
+
+/*
+General purpose caching system, with support for custom "root" duration.
+
+A cache key is basically a string composed by a "root" and a "key".
+The root part is used to customize how different
+cache elements have to behave.
+*/
+
+
 type (
 	//map key ==> cacheElement
 	cache struct{
@@ -29,7 +39,10 @@ const(
 	standardCacheElementDuration = 10 * time.Minute
 )
 
-var localCacheExpirationCheckStarted = false
+var(
+	localCacheExpirationCheckStarted = false
+	cacheRefreshTime = 1 * time.Second
+)
 
 func NewCache() *cache{
 	return &cache{
@@ -57,7 +70,7 @@ func (c *cache) StartLocalExpirationFetch(){
 	defer func(){localCacheExpirationCheckStarted = false}()
 
 	for{
-		time.Sleep(time.Second)
+		time.Sleep(cacheRefreshTime)
 		c.lock.Lock()
 		for key, element := range c.elements{
 			if element.Deadline(){
@@ -91,7 +104,7 @@ func (ce *cacheElement) Value() interface{}{
 /*
 I may want to differentiate between keys as imdbID or keys as direct name
 */
-func (c *cache) Insert(iCacheRoot CacheElementRoot,iCacheKey CacheElementKey, iValue string){
+func (c *cache) Insert(iCacheRoot CacheElementRoot,iCacheKey CacheElementKey, iValue interface{}){
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -105,7 +118,6 @@ func (c *cache) Insert(iCacheRoot CacheElementRoot,iCacheKey CacheElementKey, iV
 		value:iValue,
 	}
 }
-
 func (c *cache) Fetch(iCacheRoot CacheElementRoot,iCacheKey CacheElementKey) (oValue interface{}){
 	c.lock.RLock()
 	defer c.lock.RUnlock()
@@ -115,6 +127,11 @@ func (c *cache) Fetch(iCacheRoot CacheElementRoot,iCacheKey CacheElementKey) (oV
 		return nil
 	}
 	return cachedElement.value
+}
+func (c *cache) Reset(){
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c = NewCache()
 }
 
 func generateCacheKey(iCacheRoot CacheElementRoot,iCacheKey CacheElementKey) string{
