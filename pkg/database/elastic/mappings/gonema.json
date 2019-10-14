@@ -1,14 +1,24 @@
 {
   "mappings": {
     "properties": {
-      "suggest": {
+      "suggest_imdb_id": {
+        "type": "completion"
+      },
+      "suggest_name": {
         "type": "completion"
       },
       "name": {
         "type": "keyword",
-        "copy_to": "suggest"
+        "copy_to": "suggest_name"
       },
-      "url": {
+      "imdb_id": {
+        "type": "keyword",
+        "copy_to": "suggest_imdb_id"
+      },
+      "tmdb_id": {
+        "type": "keyword"
+      },
+      "genres": {
         "type": "keyword"
       }
     }

@@ -1,23 +1,24 @@
 package elastic
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	elastic "github.com/elastic/go-elasticsearch/v7"
+	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/lruggieri/utils"
 	"gitlab.com/ruggieri/gonema/pkg/database/initialdata"
-	"log"
 	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 var currentDirectoryPath = utils.GetCallerPaths(1)[0]
 
 //maps required index => path to relative mapping (path elements to be joined)
 var requiredIndices = map[string][]string{
-	"gonema": {currentDirectoryPath,"mappings", "gonema"},
+	"gonema": {currentDirectoryPath,"mappings", "gonema.json"},
 }
 
 type elasticDB struct{
@@ -45,13 +46,15 @@ func checkEsDB(iElasticClient *elastic.Client) (oError error){
 				if err != nil{
 					return err
 				}
+
 				indexCreationRequest := iElasticClient.Indices.Create.WithBody(indexTemplateFile)
 
 				res, err = iElasticClient.Indices.Create("gonema",indexCreationRequest)
 				if err != nil{
 					return err
 				}
-				if res.StatusCode != 200{
+				defer res.Body.Close()
+				if res.IsError(){
 					if err := json.NewDecoder(res.Body).Decode(&resBody); err != nil {
 						return errors.New("Error parsing the response body: "+ err.Error())
 					}
@@ -60,13 +63,10 @@ func checkEsDB(iElasticClient *elastic.Client) (oError error){
 				}
 
 				//now insert initial data
-				basicDataBuilder := initialdata.Builder{}
-				basicMovies, err := basicDataBuilder.GetMovies()
+				err = insertInitialData(iElasticClient, "gonema")
 				if err != nil{
-					log.Fatal(err)
+					return err
 				}
-
-				fmt.Println("got",len(basicMovies),"basic movies")
 
 			}else{
 				resBytes, _ := json.Marshal(resBody)
@@ -78,6 +78,72 @@ func checkEsDB(iElasticClient *elastic.Client) (oError error){
 	}
 
 
+
+	return nil
+}
+
+func insertInitialData(iElasticClient *elastic.Client, iIndexName string) (oErr error){
+	basicDataBuilder := initialdata.Builder{}
+	basicMovies, err := basicDataBuilder.GetMovies()
+	if err != nil{
+		return err
+	}
+
+	bulkSize := 5000
+	currentBulkElements := 0
+	currentBulkBody := strings.Builder{}
+	type bulkMovie struct{
+		Movie initialdata.Movie `json:"-"`
+		Id string `json:"_id"`
+	}
+
+	//index each movie
+	for _,movieToIndex := range basicMovies{
+		if movieToIndex.Id <= 0{continue}
+
+		marshBMovie,err := json.Marshal(movieToIndex)
+		if err != nil{
+			return err
+		}
+		//action_and_meta_data
+		currentBulkBody.WriteString(`{"index":{"_index":"`+iIndexName+`", "_id":"`+movieToIndex.ImdbID+`"}}`)
+		currentBulkBody.WriteString("\n")
+		//optional_source (not so optional in my opinion, but...)
+		currentBulkBody.Write(marshBMovie)
+		currentBulkBody.WriteString("\n")
+		currentBulkElements++
+
+		if currentBulkElements > 0 && currentBulkElements % bulkSize == 0{
+			request := esapi.BulkRequest{
+				Index:iIndexName,
+				Body:strings.NewReader(currentBulkBody.String()),
+				Refresh:"true",
+			}
+			resp, err := request.Do(context.Background(),iElasticClient)
+			if err != nil{
+				return err
+			}
+			defer resp.Body.Close()
+
+			var r map[string]interface{}
+			if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
+				return errors.New("Error parsing the response body: "+err.Error())
+			}
+			if resp.IsError(){
+				marshResp, err := json.Marshal(r)
+				if err != nil{
+					return err
+				}
+				return errors.New("error inserting movie "+movieToIndex.ImdbID+": "+resp.Status()+".Full resp: "+string(marshResp))
+			}else{
+			}
+
+			//reset next bulk
+			currentBulkBody = strings.Builder{}
+			currentBulkElements = 0
+		}
+
+	}
 
 	return nil
 }
