@@ -16,9 +16,17 @@ import (
 
 var currentDirectoryPath = utils.GetCallerPaths(1)[0]
 
+type indexBlocks struct{
+	templatePath []string
+	insertionFunction func(iElasticClient *elastic.Client, iIndexName string) (oErr error)
+}
+
 //maps required index => path to relative mapping (path elements to be joined)
-var requiredIndices = map[string][]string{
-	"gonema": {currentDirectoryPath,"mappings", "gonema.json"},
+var requiredIndices = map[string]indexBlocks{
+	"gonema": {
+		templatePath:[]string{currentDirectoryPath,"mappings", "gonema.json"},
+		insertionFunction:insertInitialMovieData,
+	},
 }
 
 type elasticDB struct{
@@ -28,7 +36,7 @@ type elasticDB struct{
 //checks that the input ES has the proper indices. If not, initialize them
 func checkEsDB(iElasticClient *elastic.Client) (oError error){
 
-	for requiredIndexName, requiredIndexPath := range requiredIndices{
+	for requiredIndexName, requiredIndexBlocks := range requiredIndices{
 		res, err := iElasticClient.Indices.Get([]string{requiredIndexName})
 		if err != nil{
 			return err
@@ -42,7 +50,7 @@ func checkEsDB(iElasticClient *elastic.Client) (oError error){
 		if res.StatusCode != http.StatusOK{
 			if res.StatusCode == http.StatusNotFound{
 				//index not found, we have to create it
-				indexTemplateFile, err := os.Open(path.Join(requiredIndexPath...))
+				indexTemplateFile, err := os.Open(path.Join(requiredIndexBlocks.templatePath...))
 				if err != nil{
 					return err
 				}
@@ -63,7 +71,7 @@ func checkEsDB(iElasticClient *elastic.Client) (oError error){
 				}
 
 				//now insert initial data
-				err = insertInitialData(iElasticClient, "gonema")
+				err = requiredIndexBlocks.insertionFunction(iElasticClient, "gonema")
 				if err != nil{
 					return err
 				}
@@ -73,7 +81,35 @@ func checkEsDB(iElasticClient *elastic.Client) (oError error){
 				return errors.New("cannot get indices info. Resp: "+string(resBytes))
 			}
 		}else{
-			//TODO check that at least we have some movie document
+			//checking if there is some document in the index
+
+			countRequest := esapi.CountRequest{
+				Index:[]string{requiredIndexName},
+			}
+			res, err := countRequest.Do(context.Background(), iElasticClient)
+			if err != nil{
+				return err
+			}
+
+			if err := json.NewDecoder(res.Body).Decode(&resBody); err != nil {
+				return errors.New("Error parsing the response body: "+ err.Error())
+			}
+			resBytes, _ := json.Marshal(resBody)
+			if res.IsError(){
+				return errors.New("cannot check documents number for index '"+requiredIndexName+"'. Response: "+string(resBytes))
+			}
+			if count, ok := resBody["count"].(float64) ; ok{
+				if count == 0{
+					//if there is no document, insert initial ones
+					err = requiredIndexBlocks.insertionFunction(iElasticClient, "gonema")
+					if err != nil{
+						return err
+					}
+				}
+			}else{
+				return errors.New("cannot check documents number, " +
+					"count not found in response for index '"+requiredIndexName+"'. Response: "+string(resBytes))
+			}
 		}
 	}
 
@@ -82,14 +118,15 @@ func checkEsDB(iElasticClient *elastic.Client) (oError error){
 	return nil
 }
 
-func insertInitialData(iElasticClient *elastic.Client, iIndexName string) (oErr error){
+//call functions to build initial data an insert the in ES
+func insertInitialMovieData(iElasticClient *elastic.Client, iIndexName string) (oErr error){
 	basicDataBuilder := initialdata.Builder{}
 	basicMovies, err := basicDataBuilder.GetMovies()
 	if err != nil{
 		return err
 	}
 
-	bulkSize := 5000
+	bulkSize := 5000 //number of movies for each bulk request
 	currentBulkElements := 0
 	currentBulkBody := strings.Builder{}
 	type bulkMovie struct{

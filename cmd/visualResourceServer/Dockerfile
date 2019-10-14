@@ -1,6 +1,5 @@
 FROM centos:7
 
-# Add Maintainer Info
 LABEL maintainer="Luca Ruggieri <luc4.ruggieri@gmail.com>"
 
 WORKDIR /visualResourceServer
