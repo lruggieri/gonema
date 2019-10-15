@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"gitlab.com/ruggieri/gonema/pkg/database/elastic"
 	"log"
 	"net/http"
+	"os"
 )
 
 
@@ -16,16 +18,27 @@ func main(){
 	}
 	elasticConnection = esCon
 
-	http.HandleFunc("/complete",AutocompleteHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/complete",AutocompleteHandler)
 
-	_, err = elasticConnection.Suggest("suggest_name","harry po")
-	if err != nil{
-		log.Fatal(err)
+	port := os.Getenv("GONEMAES_API_PORT")
+	if port == "" {
+		port = "8080"
 	}
+	fmt.Println("running API on port "+port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), mux))
 
 }
 
 
 func AutocompleteHandler(w http.ResponseWriter, r *http.Request){
 
+	//TODO parse request and dela with the suggestion
+
+
+	suggestions, err := elasticConnection.Suggest("gonema","suggest_name","harry po",20)
+	if err != nil{
+		log.Fatal(err)
+	}
+	fmt.Println(suggestions)
 }
