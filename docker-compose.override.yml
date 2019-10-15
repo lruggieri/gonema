@@ -36,5 +36,10 @@ services:
 
   gonemaes_api:
     environment:
-      - GONEMAES_HOST=http://gonemaes_server
-      - GONEMAES_PORT=9200
+      GONEMAES_HOST: http://gonemaes_server
+      GONEMAES_PORT: 9200
+
+
+  gonemakib:
+    environment:
+      ELASTICSEARCH_HOSTS: http://gonemaes_server:9200

@@ -45,8 +45,17 @@ services:
       context: ./
       dockerfile: cmd/elasticSearchServer/Dockerfile
     environment:
-      - GONEMAES_HOST=https://gonemaes.ruggieri.tech
+      - GONEMAES_HOST=https://gonemaeserver.ruggieri.tech
       - GONEMAES_PORT=9200
+
+  gonemakib:
+    image: docker.elastic.co/kibana/kibana:7.4.0
+    container_name: gonemakib
+    environment:
+      SERVER_NAME: gonemakib
+      ELASTICSEARCH_HOSTS: https://gonemaeserver.ruggieri.tech:8000
+    ports:
+      - 5601:5601
 
 volumes:
   esdata01:

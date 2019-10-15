@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	elastic "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
+	elastic"github.com/olivere/elastic/v7"
 	"github.com/lruggieri/utils"
 	"gitlab.com/ruggieri/gonema/pkg/database/initialdata"
 	"net/http"
@@ -29,9 +29,7 @@ var requiredIndices = map[string]indexBlocks{
 	},
 }
 
-type elasticDB struct{
-	connection *elastic.Client
-}
+
 
 //checks that the input ES has the proper indices. If not, initialize them
 func checkEsDB(iElasticClient *elastic.Client) (oError error){
@@ -185,7 +183,7 @@ func insertInitialMovieData(iElasticClient *elastic.Client, iIndexName string) (
 	return nil
 }
 
-func New(iHost, iPort string) (oElasticDB *elasticDB, oErr error){
+func New(iHost, iPort string) (oElasticDB *Connection, oErr error){
 	cfg := elastic.Config{
 		Addresses: []string{
 			iHost +":"+ iPort,
@@ -201,5 +199,5 @@ func New(iHost, iPort string) (oElasticDB *elasticDB, oErr error){
 		return nil, err
 	}
 
-	return &elasticDB{connection:es}, nil
+	return &Connection{connection: es}, nil
 }
