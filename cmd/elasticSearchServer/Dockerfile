@@ -27,5 +27,7 @@ COPY pkg pkg
 
 RUN go build -o elasticSearchServer cmd/elasticSearchServer/main.go
 
+EXPOSE 8080
+
 # Command to run visualResourceServer
 CMD ["./elasticSearchServer"]

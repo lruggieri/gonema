@@ -25,8 +25,10 @@ services:
       - ./website:/web/website
       - ./configs:/web/configs
     environment:
-      - GONEMAPI_HOST=http://gonemapi
-      - GONEMAPI_PORT=8080 # using default internal network
+      GONEMAPI_HOST: http://gonemapi
+      GONEMAPI_PORT: 8080 # using default internal network
+      GONEMAES_API_HOST: http://gonemaes_api
+      GONEMAES_API_PORT: 8081
 
 
   gonemaes_server:
@@ -36,8 +38,11 @@ services:
 
   gonemaes_api:
     environment:
-      GONEMAES_HOST: http://gonemaes_server
-      GONEMAES_PORT: 9200
+      GONEMAES_SERVER_HOST: http://gonemaes_server
+      GONEMAES_SERVER_PORT: 9200
+      # port 8080 by default
+    ports:
+      - 8081:8080 #port 8081 to avoid reusing 8080, which should be already used by website
 
 
   gonemakib:

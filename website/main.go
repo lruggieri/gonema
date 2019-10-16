@@ -141,8 +141,14 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) *internalE
 			if err != nil{
 				return &internalError{Error:err,Message:"internal error",Code:http.StatusInternalServerError}
 			}
-			respondResourceInfo(w, resources)
+			utils.Respond(w, http.StatusOK, utils.ResponseLayout{Response:resources})
 		}
+		case "suggest":{
+			//proxyReq, err := http.NewRequest(r.Method,)
+			fmt.Println(r.URL,r.RequestURI)
+			utils.Respond(w, http.StatusOK, utils.ResponseLayout{Response:"OK"})
+		}
+
 		default:
 			return &internalError{Error: nil,Message:"action '"+action+"' not recognized",Code:http.StatusBadRequest}
 		}
@@ -151,14 +157,4 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) *internalE
 	}else{
 		return &internalError{Error: nil,Message:"expecting POST request to central, got "+r.Method,Code:http.StatusBadRequest}
 	}
-}
-
-func respondResourceInfo(w http.ResponseWriter, iResponseResources interface{}){
-
-	w.Header().Set("content-type", "application/json")
-	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.WriteHeader(http.StatusOK)
-
-	encodeError := json.NewEncoder(w).Encode(iResponseResources)
-	dealWithEncodingError(w,encodeError)
 }

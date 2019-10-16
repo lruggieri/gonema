@@ -49,26 +49,26 @@ func resourceInfo(w http.ResponseWriter, r *http.Request){
 	requestParameters:= r.URL.Query()
 	if imdbID := requestParameters.Get(resourceImdbIDElementCacheKey) ; len(imdbID) > 0{
 		if cachedResult := localCache.Fetch(resourceImdbIDElementCacheKey, utils.CacheElementKey(imdbID)) ; cachedResult != nil{
-			utils.Respond(w,http.StatusOK,[]byte(cachedResult.(string)))
+			utils.Respond(w,http.StatusOK,utils.ResponseLayout{Response:cachedResult.(string)})
 		}else{
 			resource,err := visual_resource.GetResources("",imdbID)
 			resourceJson := resource.Json()
 			if err != nil{
-				utils.DealWithInternalError(w,err)
+				utils.Respond(w,http.StatusBadRequest,utils.ResponseLayout{Error:err.Error(),IsInternalError:true})
 			}else{
-				utils.Respond(w,http.StatusOK,[]byte(resourceJson))
+				utils.Respond(w,http.StatusOK,utils.ResponseLayout{Response:resourceJson})
 			}
 			localCache.Insert(resourceImdbIDElementCacheKey, utils.CacheElementKey(imdbID), resourceJson)
 		}
 	}else if resourceTitle := requestParameters.Get(resourceNameElementCacheKey) ; len(resourceTitle) > 0{
 		if cachedResult := localCache.Fetch(resourceNameElementCacheKey, utils.CacheElementKey(resourceTitle)) ; cachedResult != nil{
-			utils.Respond(w,http.StatusOK,[]byte(cachedResult.(string)))
+			utils.Respond(w,http.StatusOK,utils.ResponseLayout{Response:cachedResult.(string)})
 		}else{
-			utils.Respond(w,http.StatusOK,[]byte("Sorry, "+resourceNameElementCacheKey+" not handled yet"))
+			utils.Respond(w,http.StatusOK,utils.ResponseLayout{Error:"sorry, "+resourceNameElementCacheKey+" not handled yet"})
 			//TODO save in cache
 		}
 	}else{
-		utils.Respond(w,http.StatusBadRequest,[]byte(
-			"Please, specify '"+resourceImdbIDElementCacheKey+"' or '"+resourceNameElementCacheKey+"'"))
+		utils.Respond(w,http.StatusBadRequest,utils.ResponseLayout{
+			Error:"please, specify '"+resourceImdbIDElementCacheKey+"' or '"+resourceNameElementCacheKey+"'"})
 	}
 }

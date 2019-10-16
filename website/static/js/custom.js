@@ -191,6 +191,24 @@ $( document ).ready(function() {
         }
     });
 
+    $("#inputResourceName").autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url : "/central",
+                type : 'GET',
+                cache : false,
+                data : {
+                    ajax : true,
+                    resourceName : encodeURIComponent($(this).val()),
+                    action : "suggest",
+                },
+                success : function (result) {
+                    console.log(result)
+                }
+            });
+        },
+        minLength: 1
+    });
 
     function customShow($inputDiv){
         $inputDiv.show();
