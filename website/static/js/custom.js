@@ -195,17 +195,29 @@ $( document ).ready(function() {
         source: function(request, response) {
             $.ajax({
                 url : "/central",
-                type : 'GET',
-                cache : false,
+                type : 'POST',
+                cache: false,
                 data : {
                     ajax : true,
-                    resourceName : encodeURIComponent($(this).val()),
+                    resourceName : encodeURIComponent($("#inputResourceName").val()),
                     action : "suggest",
                 },
                 success : function (result) {
-                    console.log(result)
+                    if (result.hasOwnProperty("response")){
+                        let suggestion = result["response"];
+                        response(suggestion)
+                    }
+                },
+                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                    response("error");
                 }
             });
+        },
+        select: function (event, ui) {
+            // Set selection
+            $("#inputResourceName").val(ui.item.label); // display the selected text
+            return false;
         },
         minLength: 1
     });

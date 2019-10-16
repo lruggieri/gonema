@@ -54,15 +54,15 @@ func AutocompleteHandler(w http.ResponseWriter, r *http.Request){
 	requestedSize := urlParameters.Get("size")
 	var requestedSizeInt int
 	if len(requestedField) == 0{
-		utils.Respond(w,http.StatusBadRequest,utils.ResponseLayout{Error:"'field' parameter not specified"})
+		utils.Respond(w,utils.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"'field' parameter not specified"})
 		return
 	}
 	if len(requestedText) == 0{
-		utils.Respond(w,http.StatusBadRequest,utils.ResponseLayout{Error:"'text' parameter not specified"})
+		utils.Respond(w,utils.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"'text' parameter not specified"})
 		return
 	}
 	if requestedSizeConverted, err := strconv.Atoi(requestedSize) ; err != nil || requestedSizeConverted <= 0{
-		utils.Respond(w,http.StatusBadRequest,utils.ResponseLayout{Error:"'size' parameter invalid"})
+		utils.Respond(w,utils.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"'size' parameter invalid"})
 		return
 	}else{
 		requestedSizeInt = requestedSizeConverted
@@ -72,12 +72,12 @@ func AutocompleteHandler(w http.ResponseWriter, r *http.Request){
 
 	suggestions, err := elasticConnection.Suggest("gonema",requestedField,requestedText,requestedSizeInt)
 	if err != nil{
-		utils.Respond(w,http.StatusInternalServerError,utils.ResponseLayout{Error:err.Error(),IsInternalError:true})
+		utils.Respond(w,utils.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(),IsInternalError:true})
 		return
 	}
 	if err != nil{
-		utils.Respond(w,http.StatusInternalServerError,utils.ResponseLayout{Error:err.Error(),IsInternalError:true})
+		utils.Respond(w,utils.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(),IsInternalError:true})
 		return
 	}
-	utils.Respond(w,http.StatusOK,utils.ResponseLayout{Response:suggestions})
+	utils.Respond(w,utils.ResponseLayout{StatusCode:http.StatusOK,Response:suggestions})
 }
