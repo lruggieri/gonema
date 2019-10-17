@@ -25,7 +25,6 @@ COPY pkg/utils pkg/utils
 COPY go.mod go.sum ./
 RUN go mod download
 RUN go mod vendor
-COPY configs configs
 COPY website website
 
 

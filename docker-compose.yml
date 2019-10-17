@@ -38,7 +38,7 @@ services:
     volumes:
       - esdata01:/usr/share/elasticsearch/data
     ports:
-      - 8000:9200
+      - 8000:8000
 
   gonemaes_api:
     image: eu.gcr.io/gonema/gonemaes_api:latest

@@ -33,7 +33,7 @@ services:
 
   gonemaes_server:
     ports:
-      - 9200:9200
+      - 9200:8080
 
 
   gonemaes_api:

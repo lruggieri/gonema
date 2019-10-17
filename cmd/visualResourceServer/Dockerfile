@@ -28,7 +28,6 @@ RUN wget https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz && \
 ENV GOROOT='/usr/local/go'
 ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-COPY configs configs
 COPY go.mod go.sum ./
 
 RUN go mod download
