@@ -7,7 +7,7 @@ import (
 	"github.com/chromedp/chromedp"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/ruggieri/gonema/pkg/utils"
+	"github.com/lruggieri/gonema/pkg/utils"
 	"os"
 	"path"
 	"testing"

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/olivere/elastic/v7"
-	"gitlab.com/ruggieri/gonema/pkg/database/initialdata"
+	"github.com/lruggieri/gonema/pkg/database/initialdata"
 )
 
 type Connection struct{

@@ -17,20 +17,20 @@ services:
       context: ./
       dockerfile: ./website/Dockerfile
     environment:
-      - TEMPLATES_DIR=website/templates
-      - STATIC_ASSET_DIR=website/static
-      - GONEMAPI_HOST=https://gonemapi.ruggieri.tech
+      TEMPLATES_DIR: website/templates
+      STATIC_ASSET_DIR: website/static
+      GONEMAPI_HOST: https://gonemapi.ruggieri.tech
+      GONEMAES_API_HOST: http://gonemaes_api
     restart: always
 
   gonemaes_server:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
+    image: eu.gcr.io/gonema/gonemaes_server:latest
     container_name: gonemaes_server
+    build:
+      context: ./
+      dockerfile: ./pkg/database/elastic/Dockerfile
     environment:
-      - node.name=es01
-      - cluster.initial_master_nodes=es01
-      - cluster.name=gonema-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      ES_JAVA_OPTS: "-Xms2g -Xmx2g"
     ulimits:
       memlock:
         soft: -1
@@ -40,8 +40,8 @@ services:
     ports:
       - 8000:9200
 
-
   gonemaes_api:
+    image: eu.gcr.io/gonema/gonemaes_api:latest
     container_name: gonemaes_api
     build:
       context: ./

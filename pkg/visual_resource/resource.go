@@ -3,9 +3,9 @@ package visual_resource
 import (
 	"encoding/json"
 	"errors"
-	"gitlab.com/ruggieri/gonema/pkg/scraper"
-	"gitlab.com/ruggieri/gonema/pkg/scraper/rarbg"
-	"gitlab.com/ruggieri/gonema/pkg/torrent"
+	"github.com/lruggieri/gonema/pkg/scraper"
+	"github.com/lruggieri/gonema/pkg/scraper/rarbg"
+	"github.com/lruggieri/gonema/pkg/torrent"
 	"time"
 )
 

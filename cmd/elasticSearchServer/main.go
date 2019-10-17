@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"gitlab.com/ruggieri/gonema/pkg/database/elastic"
-	"gitlab.com/ruggieri/gonema/pkg/utils"
+	"github.com/lruggieri/utils/netutil"
+	"github.com/lruggieri/gonema/pkg/database/elastic"
+	"github.com/lruggieri/gonema/pkg/utils"
 	"log"
 	"net/http"
 	"os"
@@ -30,7 +31,7 @@ func main(){
 	elasticConnection = esCon
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/complete",AutocompleteHandler)
+	mux.Handle("/complete",netutil.HandleWithError(AutocompleteHandler))
 
 	port := os.Getenv("GONEMAES_API_PORT")
 	if port == "" {
@@ -41,43 +42,30 @@ func main(){
 
 }
 
-type ResponseLayout struct{
-	Response interface{} `json:"response"`
-	Error error `json:"error,omitempty"`
-}
-
-
-func AutocompleteHandler(w http.ResponseWriter, r *http.Request){
+func AutocompleteHandler(w http.ResponseWriter, r *http.Request) netutil.ResponseLayout{
 
 	urlParameters := r.URL.Query()
 	requestedField, requestedText := urlParameters.Get("field"),urlParameters.Get("text")
 	requestedSize := urlParameters.Get("size")
 	var requestedSizeInt int
 	if len(requestedField) == 0{
-		utils.Respond(w,utils.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"'field' parameter not specified"})
-		return
+		return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"'field' parameter not specified"}
 	}
 	if len(requestedText) == 0{
-		utils.Respond(w,utils.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"'text' parameter not specified"})
-		return
+		return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"'text' parameter not specified"}
 	}
 	if requestedSizeConverted, err := strconv.Atoi(requestedSize) ; err != nil || requestedSizeConverted <= 0{
-		utils.Respond(w,utils.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"'size' parameter invalid"})
-		return
+		return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"'size' parameter invalid"}
 	}else{
 		requestedSizeInt = requestedSizeConverted
 	}
 
-
-
 	suggestions, err := elasticConnection.Suggest("gonema",requestedField,requestedText,requestedSizeInt)
 	if err != nil{
-		utils.Respond(w,utils.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(),IsInternalError:true})
-		return
+		return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(),IsInternalError:true}
 	}
 	if err != nil{
-		utils.Respond(w,utils.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(),IsInternalError:true})
-		return
+		return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(),IsInternalError:true}
 	}
-	utils.Respond(w,utils.ResponseLayout{StatusCode:http.StatusOK,Response:suggestions})
+	return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:suggestions}
 }

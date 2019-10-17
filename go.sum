@@ -58,6 +58,8 @@ github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515/go.mod h1:+0opPa2QZZtGFB
 github.com/lruggieri/utils v0.0.0-20191013154638-1ba913777c20/go.mod h1:K3uwhacPLDy7PkDxICWL9S7MmFl09i8X1vcasPl0ZYM=
 github.com/lruggieri/utils v1.0.0 h1:CoKKXBlVfwCMAoPIbMZCh+bIwqugOTnWyUHPFJuY2So=
 github.com/lruggieri/utils v1.0.0/go.mod h1:K3uwhacPLDy7PkDxICWL9S7MmFl09i8X1vcasPl0ZYM=
+github.com/lruggieri/utils v1.1.0 h1:0OM02zh/C7ZiUSQmmwmlmao8e2DmMRclKoif+cyhPXY=
+github.com/lruggieri/utils v1.1.0/go.mod h1:K3uwhacPLDy7PkDxICWL9S7MmFl09i8X1vcasPl0ZYM=
 github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e h1:hB2xlXdHp/pmPZq0y3QnmWAArdw9PqbmotexnWx/FU8=
 github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
 github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5Ld7szi9bcBfOoFv/3dc6xSMkL2PC0=

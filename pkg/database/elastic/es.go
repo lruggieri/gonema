@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/lruggieri/utils"
 	"github.com/olivere/elastic/v7"
-	"gitlab.com/ruggieri/gonema/pkg/database/initialdata"
+	"github.com/lruggieri/gonema/pkg/database/initialdata"
 	"io/ioutil"
 	"os"
 	"path"
