@@ -20,7 +20,7 @@ services:
       TEMPLATES_DIR: website/templates
       STATIC_ASSET_DIR: website/static
       GONEMAPI_HOST: https://gonemapi.ruggieri.tech
-      GONEMAES_API_HOST: http://gonemaes_api
+      GONEMAES_API_HOST: http://gonemaes_api.ruggieri.tech
     restart: always
 
   gonemaes_server:
@@ -47,8 +47,8 @@ services:
       context: ./
       dockerfile: cmd/elasticSearchServer/Dockerfile
     environment:
-      - GONEMAES_HOST=https://gonemaeserver.ruggieri.tech
-      - GONEMAES_PORT=9200
+      - GONEMAES_SERVER_HOST=https://gonemaeserver.ruggieri.tech
+      - GONEMAES_SERVER_PORT=9200
 
   gonemakib:
     image: docker.elastic.co/kibana/kibana:7.4.0

@@ -3,13 +3,14 @@ package elastic
 import (
 	"context"
 	"errors"
+	"github.com/lruggieri/gonema/pkg/database/initialdata"
 	"github.com/lruggieri/utils"
 	"github.com/olivere/elastic/v7"
-	"github.com/lruggieri/gonema/pkg/database/initialdata"
 	"io/ioutil"
 	"os"
 	"path"
 	"strconv"
+	"strings"
 )
 
 var currentDirectoryPath = utils.GetCallerPaths(1)[0]
@@ -39,6 +40,7 @@ func checkEsDB(iElasticClient *elastic.Client) (oError error){
 		}
 
 		if !indexExist{
+			utils.Logger.Info("creating index "+requiredIndexName)
 			//index not found, we have to create it
 			indexTemplateFile, err := os.Open(path.Join(requiredIndexBlocks.templatePath...))
 			if err != nil{
@@ -49,6 +51,8 @@ func checkEsDB(iElasticClient *elastic.Client) (oError error){
 			if err != nil{
 				return err
 			}
+
+			utils.Logger.Info("using template "+string(indexTemplateBytes))
 
 			indexCreationResult, err := iElasticClient.CreateIndex(requiredIndexName).BodyString(string(indexTemplateBytes)).Do(context.Background())
 
@@ -95,11 +99,21 @@ func insertInitialMovieData(iElasticClient *elastic.Client, iIndexName string) (
 	bulkSize := 5000 //number of movies for each bulk request
 	currentBulkElements := 0
 
+	type expandedMovie struct{
+		BaseMovie initialdata.Movie `json:"-"`
+		SuggestionsName suggestion `json:"suggest_name"`
+	}
+
 	//index each movie
 	for _,movieToIndex := range basicMovies{
 		if movieToIndex.Id <= 0{continue}
 
-		bulkRequest.Add(elastic.NewBulkIndexRequest().Index(iIndexName).Id(movieToIndex.ImdbID).Doc(movieToIndex))
+		expandedMovie := expandedMovie{
+			BaseMovie:movieToIndex,
+			SuggestionsName:suggestion{Input:strings.Split(movieToIndex.Name," ")},
+		}
+
+		bulkRequest.Add(elastic.NewBulkIndexRequest().Index(iIndexName).Id(movieToIndex.ImdbID).Doc(expandedMovie))
 		currentBulkElements++
 
 		if currentBulkElements > 0 && currentBulkElements % bulkSize == 0{
@@ -127,7 +141,7 @@ func New(iHost, iPort string) (oElasticDB *Connection, oErr error){
 	if len(iPort) > 0 {
 		esUrl += ":" + iPort
 	}
-	es, err := elastic.NewClient(elastic.SetURL(esUrl))
+	es, err := elastic.NewClient(elastic.SetSniff(false),elastic.SetURL(esUrl))
 	if err != nil{
 		return nil, err
 	}

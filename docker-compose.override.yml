@@ -12,8 +12,6 @@ services:
       - ./pkg:/visualResourceServer/pkg
       - ./cmd/visualResourceServer:/visualResourceServer/cmd/visualResourceServer
       - ./configs:/visualResourceServer/configs
-    environment:
-      - GONEMAES_HOST=http://gonemaes
 
 
   gonemaweb:
@@ -32,13 +30,15 @@ services:
 
 
   gonemaes_server:
+    environment:
+      ES_JAVA_OPTS: "-Xms8g -Xmx8g"
     ports:
       - 9200:8080
 
 
   gonemaes_api:
     environment:
-      GONEMAES_SERVER_HOST: http://gonemaes_server
+      GONEMAES_SERVER_HOST: http://173.212.235.212
       GONEMAES_SERVER_PORT: 9200
       # port 8080 by default
     ports:
@@ -47,4 +47,4 @@ services:
 
   gonemakib:
     environment:
-      ELASTICSEARCH_HOSTS: http://gonemaes_server:9200
+      ELASTICSEARCH_HOSTS: http://gonemaes_server:8080

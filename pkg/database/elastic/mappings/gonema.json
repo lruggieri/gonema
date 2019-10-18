@@ -8,8 +8,7 @@
         "type": "completion"
       },
       "name": {
-        "type": "keyword",
-        "copy_to": "suggest_name"
+        "type": "text"
       },
       "imdb_id": {
         "type": "keyword",
@@ -19,7 +18,7 @@
         "type": "keyword"
       },
       "genres": {
-        "type": "keyword"
+        "type": "text"
       }
     }
   }
