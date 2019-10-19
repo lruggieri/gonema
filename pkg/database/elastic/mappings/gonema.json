@@ -1,14 +1,38 @@
 {
+  "settings": {
+    "analysis": {
+      "filter": {
+        "edge_ngram_filter": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 20
+        }
+      },
+      "analyzer": {
+        "edge_ngram_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "edge_ngram_filter"
+          ]
+        }
+      }
+    }
+  },
   "mappings": {
     "properties": {
       "suggest_imdb_id": {
         "type": "completion"
       },
       "suggest_name": {
-        "type": "completion"
+        "type": "text",
+        "analyzer": "edge_ngram_analyzer",
+        "search_analyzer": "standard"
       },
       "name": {
-        "type": "text"
+        "type": "text",
+        "copy_to": "suggest_name"
       },
       "imdb_id": {
         "type": "keyword",

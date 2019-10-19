@@ -60,7 +60,7 @@ func AutocompleteHandler(w http.ResponseWriter, r *http.Request) netutil.Respons
 		requestedSizeInt = requestedSizeConverted
 	}
 
-	suggestions, err := elasticConnection.Suggest("gonema",requestedField,requestedText,requestedSizeInt)
+	suggestions, err := elasticConnection.SuggestQuery("gonema",requestedField,requestedText,requestedSizeInt)
 	if err != nil{
 		return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(),IsInternalError:true}
 	}

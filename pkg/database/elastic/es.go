@@ -13,6 +13,10 @@ import (
 	"strings"
 )
 
+const(
+	bulkSize = 2000
+)
+
 var currentDirectoryPath = utils.GetCallerPaths(1)[0]
 
 type indexBlocks struct{
@@ -55,7 +59,9 @@ func checkEsDB(iElasticClient *elastic.Client) (oError error){
 			utils.Logger.Info("using template "+string(indexTemplateBytes))
 
 			indexCreationResult, err := iElasticClient.CreateIndex(requiredIndexName).BodyString(string(indexTemplateBytes)).Do(context.Background())
-
+			if err != nil{
+				return err
+			}
 			if !indexCreationResult.Acknowledged{
 				return errors.New(requiredIndexName+" index creation not acknowledged")
 			}
@@ -73,6 +79,7 @@ func checkEsDB(iElasticClient *elastic.Client) (oError error){
 				return err
 			}
 			if documentsNumber == 0{
+				utils.Logger.Info("no document found in index "+requiredIndexName+". Inserting...")
 				//if there is no document, insert initial ones
 				err = requiredIndexBlocks.insertionFunction(iElasticClient, "gonema")
 				if err != nil {
@@ -96,12 +103,12 @@ func insertInitialMovieData(iElasticClient *elastic.Client, iIndexName string) (
 	}
 
 	bulkRequest := iElasticClient.Bulk()
-	bulkSize := 5000 //number of movies for each bulk request
 	currentBulkElements := 0
+	totalInsertion := 0
 
 	type expandedMovie struct{
-		BaseMovie initialdata.Movie `json:"-"`
-		SuggestionsName suggestion `json:"suggest_name"`
+		initialdata.Movie
+		//SuggestionsName suggestion `json:"suggest_name"`
 	}
 
 	//index each movie
@@ -109,8 +116,9 @@ func insertInitialMovieData(iElasticClient *elastic.Client, iIndexName string) (
 		if movieToIndex.Id <= 0{continue}
 
 		expandedMovie := expandedMovie{
-			BaseMovie:movieToIndex,
-			SuggestionsName:suggestion{Input:strings.Split(movieToIndex.Name," ")},
+			Movie:movieToIndex,
+			//SuggestionsName:suggestion{Input:strings.Split(movieToIndex.Name," ")},
+			//SuggestionsName:suggestion{Input:getStringGrams(movieToIndex.Name," ",2)},
 		}
 
 		bulkRequest.Add(elastic.NewBulkIndexRequest().Index(iIndexName).Id(movieToIndex.ImdbID).Doc(expandedMovie))
@@ -128,12 +136,68 @@ func insertInitialMovieData(iElasticClient *elastic.Client, iIndexName string) (
 					"successfully indexed "+strconv.Itoa(len(indexed)))
 			}
 
+			totalInsertion += currentBulkElements
+			utils.Logger.Info("inserted:" + strconv.Itoa(totalInsertion) + " movies")
+
 			bulkRequest.Reset()
 			currentBulkElements = 0
 		}
 	}
 
 	return nil
+}
+
+/*
+Return every possible n-gram of the input string after splitting it with the input separator.
+Limit returned NGrams to iMinGrams.
+Input string put as the first element of the resulting slice (if it passes checks like iMinGrams).
+*/
+func getStringGrams(iString ,iSeparator string, iMinGrams int) (oPermutations []string){
+	if iMinGrams <= 0{
+		iMinGrams = 1
+	}
+
+	initialSet := strings.Split(iString,iSeparator) //starting set
+
+	/*
+	Idea: insert every single element first; the check every element inserted before and add the current element
+		between every word of that previous element.
+	Complexity: O(n)
+	*/
+
+	finalNGrams := make([][]string,0)
+	for _, initialElement := range initialSet{
+		actualGramsLen := len(finalNGrams)
+		for nGramIdx := 0; nGramIdx < actualGramsLen ; nGramIdx++{
+			nGram := finalNGrams[nGramIdx]
+			for nGramPartIdx := 0; nGramPartIdx <= len(nGram) ; nGramPartIdx++{
+				//inserting initialElement in position nGramPartIdx
+				partBefore := nGram[nGramPartIdx:]
+				partAfter := nGram[:nGramPartIdx]
+				newGram := append(append(partBefore,initialElement),partAfter...)
+				finalNGrams = append(finalNGrams,newGram)
+			}
+		}
+		finalNGrams = append(finalNGrams,[]string{initialElement})
+	}
+
+	finalStrings := make([]string,0,len(finalNGrams))
+	for _, finalNGram := range finalNGrams{
+		if len(finalNGram) >= iMinGrams{
+			tempString := strings.Join(finalNGram, iSeparator)
+			if tempString == iString{continue} //the initial string has to be the first element
+			finalStrings = append(finalStrings, tempString)
+		}
+	}
+
+	// we want the initial string at the beginning (so it's easier to find it out when getting suggestions form ES)
+	if len(strings.Split(iString, iSeparator)) >= iMinGrams{
+		finalStrings = append([]string{iString},finalStrings...)
+	}
+
+
+	return finalStrings
+
 }
 
 func New(iHost, iPort string) (oElasticDB *Connection, oErr error){
