@@ -25,26 +25,3 @@ services:
     environment:
       GONEMAPI_HOST: http://gonemapi
       GONEMAPI_PORT: 8080 # using default internal network
-      GONEMAES_API_HOST: http://gonemaes_api
-      GONEMAES_API_PORT: 8080 # using default internal network
-
-
-  gonemaes_server:
-    environment:
-      ES_JAVA_OPTS: "-Xms8g -Xmx8g"
-    ports:
-      - 9200:8080
-
-
-  gonemaes_api:
-    environment:
-      GONEMAES_SERVER_HOST: http://173.212.235.212
-      GONEMAES_SERVER_PORT: 9200
-      # port 8080 by default
-    ports:
-      - 8081:8080 #port 8081 to avoid reusing 8080, which should be already used by website
-
-
-  gonemakib:
-    environment:
-      ELASTICSEARCH_HOSTS: http://gonemaes_server:8080
