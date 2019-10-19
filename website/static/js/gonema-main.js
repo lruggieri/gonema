@@ -209,8 +209,7 @@ $( document ).ready(function() {
                     }
                 },
                 error : function(XMLHttpRequest, textStatus, errorThrown) {
-                    console.log(errorThrown);
-                    response("error");
+                    response("complete API down. Sorry for the inconvenience.");
                 }
             });
         },
@@ -219,7 +218,7 @@ $( document ).ready(function() {
             $("#inputResourceName").val(ui.item.label); // display the selected text
             return false;
         },
-        minLength: 1
+        minLength: 3
     });
 
     function customShow($inputDiv){

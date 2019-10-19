@@ -2,7 +2,7 @@ package injector
 
 import (
 	"errors"
-	"gitlab.com/ruggieri/gonema/pkg/utils"
+	"github.com/lruggieri/gonema/pkg/utils"
 	"io"
 	"io/ioutil"
 	"net"

@@ -3,9 +3,9 @@ package visual_resource
 import (
 	"encoding/json"
 	"errors"
-	"gitlab.com/ruggieri/gonema/pkg/scraper"
-	"gitlab.com/ruggieri/gonema/pkg/scraper/rarbg"
-	"gitlab.com/ruggieri/gonema/pkg/torrent"
+	"github.com/lruggieri/gonema/pkg/scraper"
+	"github.com/lruggieri/gonema/pkg/scraper/rarbg"
+	"github.com/lruggieri/gonema/pkg/torrent"
 	"time"
 )
 
@@ -65,16 +65,19 @@ func (rs *resources) setInfo() error{
 	return nil
 }
 
-
 type resource struct {
 	ImdbID            string            `json:"imdb_id"`
 	Images            resourceImages    `json:"images"`
 	ImdbScore         float64           `json:"imdb_score"` //out of 10
-	Name              string            `json:"title"`
+	Title             string            `json:"title"`
+	Type              string            `json:"type"` //movie, TV series, etc..
 	Year              int               `json:"year"`
 	ReleaseDate       time.Time         `json:"release_date"`
-	Categories        []string          `json:"categories"`
+	Rated             string            `json:"rated"`
+	Genre             []string          `json:"categories"`
 	Plot              string            `json:"plot"`
+	Country           string            `json:"country"`
+	Awards            []string          `json:"awards"`
 	Stars             []string          `json:"stars"`
 	Writers           []string          `json:"writers"`
 	Directors         []string          `json:"directors"`
@@ -105,7 +108,7 @@ func(r *resource) setTorrentInfo() error{
 		return errors.New("invalid scraper was chosen")
 	}
 
-	torrentInfo,err := scraperToUse.GetTorrentLinks(r.Name,r.ImdbID)
+	torrentInfo,err := scraperToUse.GetTorrentLinks(r.Title,r.ImdbID)
 	if err != nil{
 		return err
 	}
@@ -129,10 +132,10 @@ func (mr *mockResource) SetImages(iSmallImage, iBigImage string) *mockResource{
 	return mr
 }
 func (mr *mockResource) SetImdbScore(iImdbScore float64) *mockResource       { mr.ImdbScore = iImdbScore; return mr }
-func (mr *mockResource) SetName(iName string) *mockResource                  { mr.Name = iName; return mr }
+func (mr *mockResource) SetName(iName string) *mockResource                  { mr.Title = iName; return mr }
 func (mr *mockResource) SetYear(iYear int) *mockResource                     { mr.Year = iYear; return mr }
 func (mr *mockResource) SetReleaseDate(iReleaseDate time.Time) *mockResource { mr.ReleaseDate = iReleaseDate; return mr }
-func (mr *mockResource) SetCategories(iCategories []string) *mockResource    { mr.Categories = iCategories; return mr }
+func (mr *mockResource) SetCategories(iCategories []string) *mockResource    { mr.Genre = iCategories; return mr }
 func (mr *mockResource) SetPlot(iPlot string) *mockResource                  { mr.Plot = iPlot; return mr }
 func (mr *mockResource) SetStars(iStars []string) *mockResource              { mr.Stars = iStars; return mr }
 func (mr *mockResource) SetWriters(iWriters []string) *mockResource          { mr.Writers = iWriters; return mr }

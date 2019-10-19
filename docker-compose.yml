@@ -5,17 +5,19 @@ version: '3.0'
 services:
   gonemapi:
     image: eu.gcr.io/gonema/gonemapi:latest
+    container_name: gonemapi
     build:
       context: ./
       dockerfile: ./cmd/visualResourceServer/Dockerfile
 
   gonemaweb:
     image: eu.gcr.io/gonema/gonemaweb:latest
+    container_name: gonemaweb
     build:
       context: ./
       dockerfile: ./website/Dockerfile
     environment:
-      - TEMPLATES_DIR=website/templates
-      - STATIC_ASSET_DIR=website/static
-      - GONEMAPI_HOST=https://gonemapi.ruggieri.tech
+      TEMPLATES_DIR: website/templates
+      STATIC_ASSET_DIR: website/static
+      GONEMAPI_HOST: https://gonemapi.ruggieri.tech
     restart: always

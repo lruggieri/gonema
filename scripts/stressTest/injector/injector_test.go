@@ -2,7 +2,7 @@ package injector
 
 import (
 	"github.com/sirupsen/logrus"
-	"gitlab.com/ruggieri/gonema/pkg/utils"
+	"github.com/lruggieri/gonema/pkg/utils"
 	"testing"
 )
 

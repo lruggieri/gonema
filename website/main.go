@@ -1,12 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"gitlab.com/ruggieri/gonema/pkg/utils"
-	"gitlab.com/ruggieri/gonema/website/controller"
+	"github.com/lruggieri/gonema/website/controller"
+	"github.com/lruggieri/utils/netutil"
 	"html/template"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -55,7 +56,7 @@ func main() {
 	fs := http.FileServer(neuteredFileSystem{http.Dir(staticAssetDir)})
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 	mux.HandleFunc("/favicon.ico",faviconHandler)
-	mux.Handle("/central",handleWithError(centralControllerHandler))
+	mux.Handle("/central", netutil.HandleWithError(centralControllerHandler))
 	mux.HandleFunc("/", mainPageHandler)
 
 	var tlsCertPath = os.Getenv("TLS_CERT_PATH")
@@ -77,42 +78,7 @@ func main() {
 			panic(err)
 		}
 	}
-
-
 }
-
-type internalError struct{
-	Error error //internal error, not to display
-	Message string //message to display to the client
-	Code int //return code
-}
-type clientError struct{
-	Error error `json:"error"`
-	AdditionalInfo string `json:"additional_info"`
-}
-type handleWithError func(http.ResponseWriter, *http.Request) *internalError
-func (hwe handleWithError) ServeHTTP(w http.ResponseWriter, r *http.Request){
-	if err := hwe(w, r); err != nil {
-		clientError := clientError{Error:errors.New(err.Message)}
-
-		w.Header().Set("content-type", "application/json")
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.WriteHeader(err.Code)
-		if err.Error != nil{
-			//TODO log better
-			utils.Logger.Error(err)
-		}
-		encodeError := json.NewEncoder(w).Encode(clientError)
-		dealWithEncodingError(w,encodeError)
-	}
-}
-func dealWithEncodingError(w http.ResponseWriter, iEncodingError error){
-	if iEncodingError != nil{
-		//TODO log better
-		_,_ = fmt.Fprintln(w, `{"error":"something seriously wrong happen on our side, we are sorry for the inconvenient"}`)
-	}
-}
-
 
 func mainPageHandler(w http.ResponseWriter, r *http.Request){
 	mainPage := filepath.Join(templatesDir,"index.tmpl")
@@ -121,44 +87,95 @@ func mainPageHandler(w http.ResponseWriter, r *http.Request){
 
 	err := tmpl.Execute(w,nil)
 	if err != nil{
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Website down, we are very sorry for the inconvenience."))
 	}
-
 }
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w,r,path.Join(staticAssetDir,"images","favicon.ico"))
 }
-func centralControllerHandler(w http.ResponseWriter, r *http.Request) *internalError {
+func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.ResponseLayout {
 
 	if r.Method == http.MethodPost{
 		action := r.FormValue("action")
-		resourceName := r.FormValue("resourceName")
-		resourceImdbID := r.FormValue("resourceImdbID")
 
 		switch action {
 		case "getResourceInfo":{
+			resourceName := r.FormValue("resourceName")
+			resourceImdbID := r.FormValue("resourceImdbID")
 			resources, err := controller.GetResourceInfo(resourceName, resourceImdbID)
 			if err != nil{
-				return &internalError{Error:err,Message:"internal error",Code:http.StatusInternalServerError}
+				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error()}
 			}
-			respondResourceInfo(w, resources)
+			return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:resources}
+		}
+		case "suggest":{
+			resourceName := r.FormValue("resourceName")
+			if len(resourceName) > 0{
+				requestUrl := bytes.Buffer{}
+				requestUrl.WriteString(os.Getenv("GONEMAES_API_HOST"))
+				port := os.Getenv("GONEMAES_API_PORT")
+				if len(port) > 0 {
+					requestUrl.WriteString(":")
+					requestUrl.WriteString(port)
+				}
+				requestUrl.WriteString("/complete?field=name&text=")
+				requestUrl.WriteString(resourceName)
+				requestUrl.WriteString("&size=10")
+				resp, err := http.Get(requestUrl.String())
+				if err != nil{
+					return netutil.ResponseLayout{
+						StatusCode:http.StatusInternalServerError,
+						Error:"cannot get es_api. err: "+err.Error(),
+						IsInternalError:true,
+					}
+				}
+				defer resp.Body.Close()
+
+				respBytes, err := ioutil.ReadAll(resp.Body)
+				if err != nil{
+					return netutil.ResponseLayout{
+						StatusCode:http.StatusInternalServerError,
+						Error:"cannot read es_api response. err: "+err.Error(),
+						IsInternalError:true,
+					}
+				}
+				var respDecoded netutil.ResponseLayout
+				err = json.Unmarshal(respBytes,&respDecoded)
+				if err != nil{
+					return netutil.ResponseLayout{
+						StatusCode:http.StatusInternalServerError,
+						Error:"cannot decode es_api response. err: "+err.Error(),
+						IsInternalError:true,
+					}
+				}
+				if len(respDecoded.Error) > 0{
+					return netutil.ResponseLayout{
+						StatusCode:http.StatusInternalServerError,
+						Error:respDecoded.Error,
+					}
+				}
+				return netutil.ResponseLayout{
+					StatusCode:http.StatusOK,
+					Response:respDecoded.Response,
+				}
+			}else{
+				return netutil.ResponseLayout{
+					StatusCode:http.StatusBadRequest,
+					Error:"invalid parameters",
+				}
+			}
 		}
 		default:
-			return &internalError{Error: nil,Message:"action '"+action+"' not recognized",Code:http.StatusBadRequest}
+			return netutil.ResponseLayout{
+				StatusCode:http.StatusBadRequest,
+				Error:"action '"+action+"' not recognized",
+			}
 		}
-
-		return nil
 	}else{
-		return &internalError{Error: nil,Message:"expecting POST request to central, got "+r.Method,Code:http.StatusBadRequest}
+		return netutil.ResponseLayout{
+			StatusCode:http.StatusBadRequest,
+			Error:"expecting POST request to central, got ",
+		}
 	}
-}
-
-func respondResourceInfo(w http.ResponseWriter, iResponseResources interface{}){
-
-	w.Header().Set("content-type", "application/json")
-	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.WriteHeader(http.StatusOK)
-
-	encodeError := json.NewEncoder(w).Encode(iResponseResources)
-	dealWithEncodingError(w,encodeError)
 }

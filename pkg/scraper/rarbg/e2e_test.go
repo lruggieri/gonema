@@ -4,8 +4,8 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/nmmh/magneturi/magneturi"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/ruggieri/gonema/pkg/torrent"
-	"gitlab.com/ruggieri/gonema/pkg/utils"
+	"github.com/lruggieri/gonema/pkg/torrent"
+	"github.com/lruggieri/gonema/pkg/utils"
 	"testing"
 )
 
