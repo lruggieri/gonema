@@ -36,8 +36,8 @@ $( document ).ready(function() {
                     $resultDiv.append($imageCol);
                     $resultDiv.append($slideShowCol);*/
 
-                    if (result.hasOwnProperty('resources')){
-                        let resources = result['resources'];
+                    if (result.hasOwnProperty('response')){
+                        let resources = result['response'];
 
                         /*
                         * now we have our result. If it has more than 1 element, than we have to display it using 'div_slideshow_results'.
@@ -77,11 +77,11 @@ $( document ).ready(function() {
                                 //  SET RESULT INFO
                                 $('#single_result_title').text(singleResult['title']);
                                 $('#single_result_year').text(singleResult['year']);
-                                if ( singleResult['categories'] instanceof Array){
-                                    $('#single_result_categories').text(singleResult['categories'].filter(Boolean).join(", "));
+                                if ( singleResult['genre'] instanceof Array){
+                                    $('#single_result_categories').text(singleResult['genre'].filter(Boolean).join(", "));
                                 }
-                                if ( singleResult['stars'] instanceof Array){
-                                    $('#single_result_stars').text(singleResult['stars'].filter(Boolean).join(", "));
+                                if ( singleResult['actors'] instanceof Array){
+                                    $('#single_result_stars').text(singleResult['actors'].filter(Boolean).join(", "));
                                 }
                                 if ( singleResult['directors'] instanceof Array){
                                     $('#single_result_directors').text(singleResult['directors'].filter(Boolean).join(", "));
@@ -204,21 +204,39 @@ $( document ).ready(function() {
                 },
                 success : function (result) {
                     if (result.hasOwnProperty("response")){
-                        let suggestion = result["response"];
-                        response(suggestion)
+                        let queryResponse = result["response"];
+                        let suggestions = [];
+                        if ($.isArray(queryResponse)){
+                            $.each(queryResponse, function(suggestionIdx, suggestion){
+                                if (suggestion.hasOwnProperty("resource_id") && suggestion.hasOwnProperty("suggestion_value")){
+                                    let resourceId = suggestion["resource_id"];
+                                    let suggestionValue = suggestion["suggestion_value"];
+                                    suggestions.push({"label":suggestionValue,"value":resourceId});
+                                }else{
+                                    console.error("properties 'resource_id' and 'suggestion_value' not found in suggestion");
+                                    return false;
+                                }
+                            });
+                        }
+                        response(suggestions)
+                    }else{
+                        console.error("property 'response' not found in suggestion");
+                        response([])
                     }
                 },
                 error : function(XMLHttpRequest, textStatus, errorThrown) {
-                    response("complete API down. Sorry for the inconvenience.");
+                    console.log(errorThrown);
+                    response("error");
                 }
             });
         },
         select: function (event, ui) {
             // Set selection
-            $("#inputResourceName").val(ui.item.label); // display the selected text
+            $("#inputResourceName").val(ui.item.label); // display the selected text value
+            $("#inputResourceImdbID").val(ui.item.value); // display the selected text ID
             return false;
         },
-        minLength: 3
+        minLength: 1
     });
 
     function customShow($inputDiv){

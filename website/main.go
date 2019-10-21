@@ -105,7 +105,7 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.Re
 			resourceImdbID := r.FormValue("resourceImdbID")
 			resources, err := controller.GetResourceInfo(resourceName, resourceImdbID)
 			if err != nil{
-				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error()}
+				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
 			}
 			return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:resources}
 		}

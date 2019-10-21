@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+	"github.com/lruggieri/utils/netutil"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -11,15 +11,15 @@ import (
 )
 
 func GetResourceInfo(resourceName, resourceImdbID string) (interface{}, error) {
-	gonemapiHost := os.Getenv("GONEMAPI_HOST")
-	gonemapiPort := os.Getenv("GONEMAPI_PORT")
+	gonemapiHost := os.Getenv("GONEMAES_API_HOST")
+	gonemapiPort := os.Getenv("GONEMAES_API_PORT")
+	mountPoint := "/resourceInfo"
 
 	requestHostPort := gonemapiHost
 	if len(gonemapiPort) > 0{
 		requestHostPort += ":" + gonemapiPort
 	}
-	requestHostPort += "/resourceInfo"
-	fmt.Print(requestHostPort)
+	requestHostPort += mountPoint
 
 	client := http.Client{
 		Timeout:60*3*time.Second,
@@ -31,7 +31,7 @@ func GetResourceInfo(resourceName, resourceImdbID string) (interface{}, error) {
 
 	reqQuery := req.URL.Query()
 	reqQuery.Add("resourceName",resourceName)
-	reqQuery.Add("imdbID",resourceImdbID)
+	reqQuery.Add("imdbId",resourceImdbID)
 
 	req.URL.RawQuery = reqQuery.Encode()
 	//req.Header.Set(...,...)
@@ -46,15 +46,15 @@ func GetResourceInfo(resourceName, resourceImdbID string) (interface{}, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode != 200{
+	if resp.StatusCode != http.StatusOK{
 		return nil, errors.New(string(body))
 	}
 
-	var decodedResp interface{}
+	var decodedResp netutil.ResponseLayout
 	err = json.Unmarshal(body,&decodedResp)
 	if err != nil{
 		return nil,err
 	}
 
-	return decodedResp, nil
+	return decodedResp.Response, nil
 }
