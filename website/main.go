@@ -50,7 +50,13 @@ func (nfs neuteredFileSystem) Open(path string) (http.File, error) {
 
 func main() {
 	templatesDir = os.Getenv("TEMPLATES_DIR")
+	if len(templatesDir) == 0{
+		templatesDir = "website/templates"
+	}
 	staticAssetDir = os.Getenv("STATIC_ASSET_DIR")
+	if len(staticAssetDir) == 0{
+		staticAssetDir = "website/static"
+	}
 
 	mux := http.NewServeMux()
 	fs := http.FileServer(neuteredFileSystem{http.Dir(staticAssetDir)})
@@ -108,6 +114,17 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.Re
 				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
 			}
 			return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:resources}
+		}
+		case "getTorrents":{
+			keyword := r.FormValue("keyword")
+			if len(keyword) == 0{
+				return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid keyword when fetching torrents"}
+			}
+			torrents,err := controller.GetTorrents(keyword)
+			if err != nil{
+				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
+			}
+			return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:torrents}
 		}
 		case "suggest":{
 			resourceName := r.FormValue("resourceName")

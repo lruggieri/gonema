@@ -5,6 +5,21 @@ html {
     width: 100%;
 }
 
+.row {
+    margin-left: 5px;
+    margin-right: -5px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+td.details-control {
+    background: url('../images/details_open.png') no-repeat center center;
+    cursor: pointer;
+}
+tr.shown td.details-control {
+    background: url('../images/details_close.png') no-repeat center center;
+}
+
 .main_div {
     height: 33%;
 }
@@ -80,7 +95,7 @@ html {
 }
 
 /* Input effects*/
-span {
+.input-span {
     padding:10px;
     pointer-events: none;
     position:absolute;
