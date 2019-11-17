@@ -6,22 +6,12 @@ $(function() {
 
     $('.dataTables_length').addClass('bs-select');
 
-    $("#submit_main_form").on("click",function (e) {
-        let inputResName = $("#inputResourceName");
+    $("#main_submit_movies").on("click",function (e) {
+        let inputName = $("#inputNameMovies");
         let inputResourceImdbID = $("#inputResourceImdbID");
-        if (inputResName.val().length === 0 && inputResourceImdbID.val().length === 0){
+        if (inputResourceImdbID.val().length === 0){
             e.preventDefault();
-            $("#submit_main_form").notify(
-                "Please specify at least 1 value",
-                {
-                    position:"bottom center",
-                    showAnimation: 'slideDown',
-                    showDuration: 400,
-                    autoHide: true,
-                    // if autoHide, hide after milliseconds
-                    autoHideDelay: 2000,
-                }
-            );
+            notifyError(inputResourceImdbID ,"Please specify at least an Imdb ID","right");
         }else{
             e.preventDefault();
             $.ajax({
@@ -30,162 +20,118 @@ $(function() {
                 cache : false,
                 data : {
                     ajax : true,
-                    resourceName : inputResName.val(),
+                    resourceName : inputName.val(),
                     resourceImdbID : inputResourceImdbID.val(),
                     action : "getResourceInfo",
                 },
                 success : function (result) {
-                    /*var $resultDiv = $('#div_results');
-                    $resultDiv.empty();
+                    if (result.hasOwnProperty('error')){
+                        notifyError(".main-submit-button","resource unavailable")
+                    }else {
+                        if (result.hasOwnProperty('response')){
+                            let resource = result['response'];
 
-                    var $imageCol = $('<div class="col-md-4"></div>');
-                    var $slideShowCol = $('<div class="col-md-8"></div>');
+                            /*
+                            * now we have our result. If it has more than 1 element, than we have to display it using 'div_torrents'.
+                            * otherwise we can use 'div_single_result'
+                            * */
 
-                    $resultDiv.append($imageCol);
-                    $resultDiv.append($slideShowCol);*/
+                            let singleResultDiv = $('#div_single_result');
+                            customHide(singleResultDiv);
 
-                    if (result.hasOwnProperty('response')){
-                        let resources = result['response'];
+                            /*if (resources instanceof Array){
+                                if (resources.length > 1){
+                                    //use 'div_torrents'
+                                    //TODO
+                                    console.log("got more than 1 resource from a single ImdbID")
+                                }else if (resources.length > 0){
+                                    //use 'div_single_result'
 
-                        /*
-                        * now we have our result. If it has more than 1 element, than we have to display it using 'div_torrents'.
-                        * otherwise we can use 'div_single_result'
-                        * */
+                                    let singleResultDivBanner = $('#div_result_banner');
+                                    let singleResultDivInfo = $('#div_result_info');
+                                    let singleResultDivTorrents = $('#div_result_torrents');
+                                    let singleResult = resources[0];
 
-                        let singleResultDiv = $('#div_single_result');
-                        customHide(singleResultDiv);
 
-                        if (resources instanceof Array){
-                            if (resources.length > 1){
-                                //use 'div_torrents'
-                                //TODO
-                            }else if (resources.length > 0){
-                                //use 'div_single_result'
-
-                                let singleResultDivBanner = $('#div_result_banner');
-                                let singleResultDivInfo = $('#div_result_info');
-                                let singleResultDivTorrents = $('#div_result_torrents');
-                                let singleResult = resources[0];
-
-                                //  SET RESULT BANNER
-                                if (singleResult.hasOwnProperty('images')){
-                                    let images = singleResult['images'];
-                                    if (images.hasOwnProperty('big')){
-                                        $('#img_resource_banner').attr("src",images["big"])
+                                    //  SET RESULT BANNER
+                                    if (singleResult.hasOwnProperty('images')){
+                                        let images = singleResult['images'];
+                                        if (images.hasOwnProperty('big')){
+                                            $('#img_resource_banner').attr("src",images["big"])
+                                        }else{
+                                            console.error("single resource has no image set")
+                                        }
                                     }else{
-                                        console.error("single resource has no image set")
+                                        console.error("single resource has no images")
                                     }
+                                    //  SET RESULT INFO
+                                    $('#single_result_title').text(singleResult['title']);
+                                    $('#single_result_year').text(singleResult['year']);
+                                    if ( singleResult['genre'] instanceof Array){
+                                        $('#single_result_categories').text(singleResult['genre'].filter(Boolean).join(", "));
+                                    }
+                                    if ( singleResult['actors'] instanceof Array){
+                                        $('#single_result_stars').text(singleResult['actors'].filter(Boolean).join(", "));
+                                    }
+                                    if ( singleResult['directors'] instanceof Array){
+                                        $('#single_result_directors').text(singleResult['directors'].filter(Boolean).join(", "));
+                                    }
+
+                                    customShow(singleResultDiv);
+
+                                    fetchTorrent(inputName.val());
                                 }else{
-                                    console.error("single resource has no images")
+                                    notifyError(".main-submit-button" ,"resource not available");
                                 }
-
-                                //  SET RESULT INFO
-                                $('#single_result_title').text(singleResult['title']);
-                                $('#single_result_year').text(singleResult['year']);
-                                if ( singleResult['genre'] instanceof Array){
-                                    $('#single_result_categories').text(singleResult['genre'].filter(Boolean).join(", "));
-                                }
-                                if ( singleResult['actors'] instanceof Array){
-                                    $('#single_result_stars').text(singleResult['actors'].filter(Boolean).join(", "));
-                                }
-                                if ( singleResult['directors'] instanceof Array){
-                                    $('#single_result_directors').text(singleResult['directors'].filter(Boolean).join(", "));
-                                }
-
-
-                                // SET RESULT TORRENT SLIDESHOW
-                                if (singleResult['available_torrents'] instanceof Array){
-                                    if (singleResultDivTorrents.hasClass('slick-initialized')){
-                                        singleResultDivTorrents.slick('unslick');
-                                        singleResultDivTorrents.empty(); //reset torrent slideshow
-                                    }
-                                    singleResultDivTorrents.slick({
-                                        infinite: false,
-                                        speed: 200,
-                                        slidesToShow: 3,
-                                        slidesToScroll: 1,
-                                    });
-
-
-                                    $.each(singleResult['available_torrents'], function(key, value){
-                                        let newTorrentDiv = $('<div></div>');
-
-                                        let infoItemDiv = $('<div class="div_info_item"></div>');
-                                        infoItemDiv.append($('<h4 class="inline">Name:</h4>'));
-                                        infoItemDiv.append($('<a">'+value["name"]+'</a>'));
-                                        newTorrentDiv.append(infoItemDiv);
-
-                                        infoItemDiv = $('<div class="div_info_item"></div>');
-                                        infoItemDiv.append($('<h4 class="inline">Quality:</h4>'));
-                                        infoItemDiv.append($('<a">'+value["quality"]+'</a>'));
-                                        newTorrentDiv.append(infoItemDiv);
-
-                                        infoItemDiv = $('<div class="div_info_item"></div>');
-                                        infoItemDiv.append($('<h4 class="inline">Length:</h4>'));
-                                        infoItemDiv.append($('<a">'+value["length"]+'</a>'));
-                                        newTorrentDiv.append(infoItemDiv);
-
-                                        infoItemDiv = $('<div class="div_info_item"></div>');
-                                        infoItemDiv.append($('<h4 class="inline">Resolution:</h4>'));
-                                        infoItemDiv.append($('<a">'+value["resolution"]+'</a>'));
-                                        newTorrentDiv.append(infoItemDiv);
-
-                                        infoItemDiv = $('<div class="div_info_item"></div>');
-                                        infoItemDiv.append($('<h4 class="inline">Size:</h4>'));
-                                        infoItemDiv.append($('<a">'+value["size"]+'</a>'));
-                                        newTorrentDiv.append(infoItemDiv);
-
-                                        infoItemDiv = $('<div class="div_info_item"></div>');
-                                        infoItemDiv.append($('<h4 class="inline">Sound:</h4>'));
-                                        infoItemDiv.append($('<a">'+value["sound"]+'</a>'));
-                                        newTorrentDiv.append(infoItemDiv);
-
-                                        infoItemDiv = $('<div class="div_info_item"></div>');
-                                        infoItemDiv.append($('<h4 class="inline">Codec:</h4>'));
-                                        infoItemDiv.append($('<a">'+value["codec"]+'</a>'));
-                                        newTorrentDiv.append(infoItemDiv);
-
-                                        infoItemDiv = $('<div class="div_info_item"></div>');
-                                        infoItemDiv.append($('<h4 class="inline">Seeders:</h4>'));
-                                        infoItemDiv.append($('<a">'+value["seeders"]+'</a>'));
-                                        newTorrentDiv.append(infoItemDiv);
-
-                                        infoItemDiv = $('<div class="div_info_item"></div>');
-                                        infoItemDiv.append($('<h4 class="inline">Leechers:</h4>'));
-                                        infoItemDiv.append($('<a">'+value["leechers"]+'</a>'));
-                                        newTorrentDiv.append(infoItemDiv);
-
-                                        infoItemDiv = $('<div class="div_info_item"></div>');
-                                        infoItemDiv.append($('<h4 class="inline">Link:</h4>'));
-                                        infoItemDiv.append($('<a href="'+value["magnet_link"]+'">torrent</a>'));
-                                        newTorrentDiv.append(infoItemDiv);
-
-                                        singleResultDivTorrents.slick('slickAdd',newTorrentDiv);
-                                    });
-                                }
-
-                                customShow(singleResultDiv);
-
-                                fetchTorrent(inputResName.val());
                             }else{
-                                notifyError("#submit_main_form" ,"resource not available");
+                                //it always has to be an array. If it is not, this is an error
+                                //TODO handle error
+                                notifyError(inputName ,"some error occurred","right");
+                                console.error("resources is not an array")
+                            }*/
+
+                            let singleResultDivBanner = $('#div_result_banner');
+                            let singleResultDivInfo = $('#div_result_info');
+                            let singleResultDivTorrents = $('#div_result_torrents');
+
+                            //  SET RESULT BANNER
+                            if (resource.hasOwnProperty('Poster')) {
+                                $('#img_resource_banner').attr("src", resource["Poster"])
+                            } else {
+                                console.error("single resource has no poster")
                             }
-                        }else{
-                            //it always has to be an array. If it is not, this is an error
-                            //TODO handle error
-                            notifyError(inputResName ,"some error occurred","right");
-                            console.error("resources is not an array")
+                            //  SET RESULT INFO
+                            $('#single_result_title').text(resource['Title']);
+                            $('#single_result_year').text(resource['Year']);
+                            $('#single_result_categories').text(resource["Genre"]);
+                            $('#single_result_stars').text(resource["Actors"]);
+                            $('#single_result_directors').text(resource["Director"]);
+
+                            customShow(singleResultDiv);
+
+                            fetchTorrent(inputName.val());
+                        } else {
+                            //TODO handle error, check first for 'error'
+
+                            notifyError(".main-submit-button","resource unavailable")
                         }
-
-                    }else{
-                        //TODO handle error, check first for 'error'
-
-                        notifyError("#submit_main_form","some error occurred")
                     }
-
                 },
                 error: dealWithAjaxError,
             });
+        }
+    });
+
+    $("#main_submit_torrents").on("click",function (e) {
+        e.preventDefault();
+        let inputName = $("#inputNameTorrents");
+        if (inputName.val().length === 0){
+            e.preventDefault();
+            notifyError(inputName ,"Please specify a torrent name","right");
+        }else{
+            let singleResultDiv = $('#div_single_result');
+            customHide(singleResultDiv);
+            fetchTorrent(inputName.val());
         }
     });
 
@@ -229,18 +175,18 @@ $(function() {
                             customShow(torrentsDiv);
 
                         }else{
-                            notifyError("#submit_main_form" ,"resource not available");
+                            notifyError(".main-submit-button" ,"resource not available");
                         }
                     }else{
                         //it always has to be an array. If it is not, this is an error
                         //TODO handle error
-                        notifyError($("#inputResourceName") ,"no torrent available","right");
+                        notifyError($(".main-submit-button") ,"no torrent available","right");
                     }
 
                 }else{
                     //TODO handle error, check first for 'error'
 
-                    notifyError("#submit_main_form","some error occurred")
+                    notifyError(".main-submit-button","some error occurred")
                 }
 
             },
@@ -280,7 +226,7 @@ $(function() {
         }
     }
 
-    $("#inputResourceName").autocomplete({
+    $("#inputNameMovies").autocomplete({
         source: function(request, response) {
             $.ajax({
                 url : "/central",
@@ -288,21 +234,31 @@ $(function() {
                 cache: false,
                 data : {
                     ajax : true,
-                    resourceName : encodeURIComponent($("#inputResourceName").val()),
+                    resourceName : $("#inputNameMovies").val(),
                     action : "suggest",
                 },
                 success : function (result) {
                     if (result.hasOwnProperty("response")){
                         let queryResponse = result["response"];
                         let suggestions = [];
-                        if ($.isArray(queryResponse)){
-                            $.each(queryResponse, function(suggestionIdx, suggestion){
+                        if (queryResponse instanceof Array){
+                            /*$.each(queryResponse, function(suggestionIdx, suggestion){
                                 if (suggestion.hasOwnProperty("resource_id") && suggestion.hasOwnProperty("suggestion_value")){
                                     let resourceId = suggestion["resource_id"];
                                     let suggestionValue = suggestion["suggestion_value"];
                                     suggestions.push({"label":suggestionValue,"value":resourceId});
                                 }else{
                                     console.error("properties 'resource_id' and 'suggestion_value' not found in suggestion");
+                                    return false;
+                                }
+                            });*/
+                            $.each(queryResponse, function(suggestionIdx, suggestion){
+                                if (suggestion.hasOwnProperty("imdbID") && suggestion.hasOwnProperty("Title")){
+                                    let resourceId = suggestion["imdbID"];
+                                    let suggestionValue = suggestion["Title"];
+                                    suggestions.push({"label":suggestionValue,"value":resourceId});
+                                }else{
+                                    console.error("properties 'imdbID' and 'Title' not found in suggestion");
                                     return false;
                                 }
                             });
@@ -312,17 +268,16 @@ $(function() {
                         console.error("property 'response' not found in suggestion");
                         response([])
                     }
-                },
-                error: dealWithAjaxError,
+                }
             });
         },
         select: function (event, ui) {
             // Set selection
-            $("#inputResourceName").val(ui.item.label); // display the selected text value
+            $("#inputNameMovies").val(ui.item.label); // display the selected text value
             $("#inputResourceImdbID").val(ui.item.value); // display the selected text ID
             return false;
         },
-        minLength: 1
+        minLength: 3
     });
 
     function notifyError($notificationDiv, $message, $position){
@@ -379,7 +334,7 @@ $(function() {
     }
 
     function dealWithAjaxError(request, status, error) {
-        notifyError("#submit_main_form","Service unavailable. Sorry for the inconvenience.");
+        notifyError(".main-submit-button","Service unavailable. Sorry for the inconvenience.");
         console.log("StatusCode "+request.status+", response:"+request.responseText);
     }
 

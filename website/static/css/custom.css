@@ -45,17 +45,19 @@ tr.shown td.details-control {
 .main-search-box {
     width: 100%;
 }
-.centered_image{
+.main-logo{
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
-.full_div{
-    max-height: 100%;
-    max-width: 100%;
-}
-.full_div_image {
+/*.centered_image{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}*/
+.full_size {
     max-height: 100%;
     max-width: 100%;
 }
@@ -89,7 +91,7 @@ tr.shown td.details-control {
     text-align: left;
     vertical-align: middle;
 }
-#submit_main_form {
+.main-submit-button {
     display:table;
     margin:auto;
 }
