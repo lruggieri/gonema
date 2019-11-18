@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -78,9 +79,13 @@ func GetResourceInfoFromOmdb(resourceName, resourceImdbID string) (interface{}, 
 			}
 			return resultResponse,nil
 		}else{
-			return nil, errors.New("invalid response from Omdb  for query "+req.URL.RawQuery+" " +
-				"with StatusCode "+strconv.Itoa(resp.StatusCode)+ "" +
-				"and error '"+omdbResponse.Error+"'")
+			if omdbResponse.IsMovieNotFound(){
+				return nil,nil
+			}else{
+				return nil, errors.New("invalid response from Omdb  for query "+req.URL.RawQuery+" " +
+					"with StatusCode "+strconv.Itoa(resp.StatusCode)+ "" +
+					"and error '"+omdbResponse.Error+"'")
+			}
 		}
 	}
 }
@@ -91,6 +96,12 @@ type OmbdResponse struct{
 }
 func(or *OmbdResponse) IsValid() bool{
 	if or.Response == "True"{
+		return true
+	}
+	return false
+}
+func (or *OmbdResponse) IsMovieNotFound() bool{
+	if strings.ToLower(or.Error) == "movie not found!" {
 		return true
 	}
 	return false

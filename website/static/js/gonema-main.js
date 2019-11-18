@@ -255,7 +255,7 @@ $(function() {
                             $.each(queryResponse, function(suggestionIdx, suggestion){
                                 if (suggestion.hasOwnProperty("imdbID") && suggestion.hasOwnProperty("Title")){
                                     let resourceId = suggestion["imdbID"];
-                                    let suggestionValue = suggestion["Title"];
+                                    let suggestionValue = suggestion["Title"] + " ("+suggestion["Year"]+")";
                                     suggestions.push({"label":suggestionValue,"value":resourceId});
                                 }else{
                                     console.error("properties 'imdbID' and 'Title' not found in suggestion");
