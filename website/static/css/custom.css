@@ -96,6 +96,7 @@ tr.shown td.details-control {
     margin:auto;
 }
 
+
 /* Input effects*/
 .input-span {
     padding:10px;
@@ -115,10 +116,10 @@ input {
 
 input:focus + span, input:not(:placeholder-shown) + span {
     opacity:1;
-    transform: scale(0.75) translateY(-100%) translateX(-30px);
+    transform: scale(0.75) translateY(-90%) translateX(-30px);
 }
 /* For IE Browsers*/
 input:focus + span, input:not(:-ms-input-placeholder) + span {
     opacity:1;
-    transform: scale(0.75) translateY(-100%) translateX(-30px);
+    transform: scale(0.75) translateY(-90%) translateX(-30px);
 }

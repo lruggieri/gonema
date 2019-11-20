@@ -59,6 +59,7 @@ func main() {
 	fs := http.FileServer(neuteredFileSystem{http.Dir(staticAssetDir)})
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 	mux.HandleFunc("/favicon.ico",faviconHandler)
+	mux.HandleFunc("/robots.txt",robotsHandler)
 	mux.Handle("/central", netutil.HandleWithError(centralControllerHandler))
 	mux.HandleFunc("/", mainPageHandler)
 
@@ -96,6 +97,9 @@ func mainPageHandler(w http.ResponseWriter, r *http.Request){
 }
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w,r,path.Join(staticAssetDir,"images","favicon.ico"))
+}
+func robotsHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w,r,path.Join("robots.txt"))
 }
 func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.ResponseLayout {
 
