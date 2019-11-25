@@ -14,6 +14,7 @@ $(function() {
             notifyError(inputResourceImdbID ,"Please specify at least an Imdb ID","right");
         }else{
             e.preventDefault();
+            displayLoadingSubmit();
             $.ajax({
                 url : "/central",
                 type : 'POST',
@@ -25,6 +26,7 @@ $(function() {
                     action : "getResourceInfo",
                 },
                 success : function (result) {
+                    hideLoadingSubmit();
                     if (result.hasOwnProperty('error')){
                         notifyError(".main-submit-button","resource unavailable")
                     }else {
@@ -109,7 +111,7 @@ $(function() {
 
                             customShow(singleResultDiv);
 
-                            fetchTorrent(inputName.val());
+                            fetchTorrent(inputName.val(),"movie");
                         } else {
                             //TODO handle error, check first for 'error'
 
@@ -126,7 +128,6 @@ $(function() {
         e.preventDefault();
         let inputName = $("#inputNameTorrents");
         if (inputName.val().length === 0){
-            e.preventDefault();
             notifyError(inputName ,"Please specify a torrent name","right");
         }else{
             let singleResultDiv = $('#div_single_result');
@@ -134,97 +135,6 @@ $(function() {
             fetchTorrent(inputName.val());
         }
     });
-
-    function fetchTorrent(iKeyword){
-        $.ajax({
-            url : "/central",
-            type : 'POST',
-            cache : false,
-            data : {
-                ajax : true,
-                keyword : iKeyword,
-                action : "getTorrents",
-            },
-            success : function (result) {
-                if (result.hasOwnProperty('response')){
-                    let torrents = result['response'];
-
-                    /*
-                    * now we have our result. If it has more than 1 element, than we have to display it using 'div_torrents'.
-                    * otherwise we can use 'div_single_result'
-                    * */
-
-                    let torrentsDiv = $('#div_torrents');
-                    customHide(torrentsDiv);
-                    resetTorrentDataTable();
-
-                    if (torrents instanceof Array){
-                        if (torrents.length > 0){
-
-                            //now fetch and populate torrent table
-                            for(let i=0 ; i<torrents.length ; i++){
-                                let currentTorrent = torrents[i];
-                                $torrents_table.row.add([
-                                    currentTorrent["name"],
-                                    humanFileSize(currentTorrent["size"]),
-                                    '<a href="'+currentTorrent["magnet_link"]+'">Link</a>',
-                                    currentTorrent["peers"],
-                                    formatFiles(currentTorrent["files"])
-                                ]).draw();
-                            }
-                            customShow(torrentsDiv);
-
-                        }else{
-                            notifyError(".main-submit-button" ,"resource not available");
-                        }
-                    }else{
-                        //it always has to be an array. If it is not, this is an error
-                        //TODO handle error
-                        notifyError($(".main-submit-button") ,"no torrent available","right");
-                    }
-
-                }else{
-                    //TODO handle error, check first for 'error'
-
-                    notifyError(".main-submit-button","some error occurred")
-                }
-
-            },
-            error: dealWithAjaxError,
-        });
-    }
-
-    function formatFiles (inputFilesList) {
-        if (inputFilesList instanceof Array){
-            //creating table listing all files and respective size
-            let table =
-                '<table class="table table-hover table-striped" cellspacing="0" width="100%">' +
-                '            <thead>' +
-                '            <tr>' +
-                '                <th>Path</th>' +
-                '                <th>Size</th>' +
-                '            </tr>' +
-                '            <tbody>'
-            ;
-
-            for(let i = 0 ; i < inputFilesList.length ; i++){
-                table +=
-                    '<tr>'+
-                        '<td>'+inputFilesList[i].path+'</td>'+
-                        '<td>'+humanFileSize(inputFilesList[i].size)+'</td>'+
-                    '</tr>'
-            }
-
-            table +=
-                '            </tbody>'+
-                '            </thead>' +
-                '</table>';
-
-            return table;
-        }else{
-            return ""
-        }
-    }
 
     $("#inputNameMovies").autocomplete({
         source: function(request, response) {
@@ -280,6 +190,100 @@ $(function() {
         minLength: 3
     });
 
+
+
+    function fetchTorrent(iKeyword, iType){
+        displayLoadingSubmit();
+        $.ajax({
+            url : "/central",
+            type : 'POST',
+            cache : false,
+            data : {
+                ajax : true,
+                keyword : iKeyword,
+                type: iType,
+                action : "getTorrents",
+            },
+            success : function (result) {
+                hideLoadingSubmit();
+                if (result.hasOwnProperty('response')){
+                    let torrents = result['response'];
+
+                    /*
+                    * now we have our result. If it has more than 1 element, than we have to display it using 'div_torrents'.
+                    * otherwise we can use 'div_single_result'
+                    * */
+
+                    let torrentsDiv = $('#div_torrents');
+                    customHide(torrentsDiv);
+                    resetTorrentDataTable();
+
+                    if (torrents instanceof Array){
+                        if (torrents.length > 0){
+
+                            //now fetch and populate torrent table
+                            for(let i=0 ; i<torrents.length ; i++){
+                                let currentTorrent = torrents[i];
+                                $torrents_table.row.add([
+                                    currentTorrent["name"],
+                                    humanFileSize(currentTorrent["size"]),
+                                    '<a href="'+currentTorrent["magnet_link"]+'">Link</a>',
+                                    currentTorrent["peers"],
+                                    formatFiles(currentTorrent["files"])
+                                ]).draw();
+                            }
+                            customShow(torrentsDiv);
+
+                        }else{
+                            notifyError(".main-submit-button" ,"resource not available");
+                        }
+                    }else{
+                        //it always has to be an array. If it is not, this is an error
+                        //TODO handle error
+                        notifyError($(".main-submit-button") ,"no torrent available","right");
+                    }
+
+                }else{
+                    //TODO handle error, check first for 'error'
+
+                    notifyError(".main-submit-button","some error occurred")
+                }
+
+            },
+            error: dealWithAjaxError,
+        });
+    }
+    function formatFiles (inputFilesList) {
+        if (inputFilesList instanceof Array){
+            //creating table listing all files and respective size
+            let table =
+                '<table class="table table-hover table-striped" cellspacing="0" width="100%">' +
+                '            <thead>' +
+                '            <tr>' +
+                '                <th>Path</th>' +
+                '                <th>Size</th>' +
+                '            </tr>' +
+                '            <tbody>'
+            ;
+
+            for(let i = 0 ; i < inputFilesList.length ; i++){
+                table +=
+                    '<tr>'+
+                        '<td>'+inputFilesList[i].path+'</td>'+
+                        '<td>'+humanFileSize(inputFilesList[i].size)+'</td>'+
+                    '</tr>'
+            }
+
+            table +=
+                '            </tbody>'+
+                '            </thead>' +
+                '</table>';
+
+            return table;
+        }else{
+            return ""
+        }
+    }
     function notifyError($notificationDiv, $message, $position){
 
         if (typeof $position === "undefined" || !$position.length){
@@ -300,6 +304,12 @@ $(function() {
             );
     }
 
+    function displayLoadingSubmit(){
+        $('.spinner-submit').addClass("spinner-border spinner-border-sm")
+    }
+    function hideLoadingSubmit(){
+        $('.spinner-submit').removeClass("spinner-border spinner-border-sm")
+    }
     function customShow($inputDiv){
         $inputDiv.show();
     }
@@ -334,6 +344,7 @@ $(function() {
     }
 
     function dealWithAjaxError(request, status, error) {
+        hideLoadingSubmit();
         notifyError(".main-submit-button","Service unavailable. Sorry for the inconvenience.");
         console.log("StatusCode "+request.status+", response:"+request.responseText);
     }

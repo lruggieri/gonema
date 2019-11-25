@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func GetTorrents(iKeyword string) (interface{}, error) {
+func GetTorrents(iKeyword, iType string) (interface{}, error) {
 	gonemapiHost := os.Getenv("GONEMAES_API_HOST")
 	gonemapiPort := os.Getenv("GONEMAES_API_PORT")
 	mountPoint := "/torrents"
@@ -31,6 +31,7 @@ func GetTorrents(iKeyword string) (interface{}, error) {
 
 	reqQuery := req.URL.Query()
 	reqQuery.Add("key", iKeyword)
+	reqQuery.Add("type", iType)
 
 	req.URL.RawQuery = reqQuery.Encode()
 	//req.Header.Set(...,...)
