@@ -6,122 +6,77 @@ $(function() {
 
     $('.dataTables_length').addClass('bs-select');
 
+    $("#form_search_movies").on("submit",function (e) {
+        e.preventDefault();
+        console.log("trigger movie");
+        $("#main_submit_movies").trigger('click');
+    });
+    $("#form_search_torrents").on("submit",function (e) {
+        e.preventDefault();
+        console.log("trigger torrents");
+        $("#main_submit_torrents").trigger('click');
+    });
+
     $("#main_submit_movies").on("click",function (e) {
         let inputName = $("#inputNameMovies");
         let inputResourceImdbID = $("#inputResourceImdbID");
-        if (inputResourceImdbID.val().length === 0){
-            e.preventDefault();
-            notifyError(inputResourceImdbID ,"Please specify at least an Imdb ID","right");
-        }else{
-            e.preventDefault();
-            displayLoadingSubmit();
-            $.ajax({
-                url : "/central",
-                type : 'POST',
-                cache : false,
-                data : {
-                    ajax : true,
-                    resourceName : inputName.val(),
-                    resourceImdbID : inputResourceImdbID.val(),
-                    action : "getResourceInfo",
-                },
-                success : function (result) {
-                    hideLoadingSubmit();
-                    if (result.hasOwnProperty('error')){
-                        notifyError(".main-submit-button","resource unavailable")
-                    }else {
-                        if (result.hasOwnProperty('response')){
-                            let resource = result['response'];
+        e.preventDefault();
+        displayLoadingSubmit();
+        $.ajax({
+            url : "/central",
+            type : 'POST',
+            cache : false,
+            data : {
+                ajax : true,
+                resourceName : inputName.val(),
+                resourceImdbID : inputResourceImdbID.val(),
+                action : "getResourceInfo",
+            },
+            success : function (result) {
+                hideLoadingSubmit();
+                if (result.hasOwnProperty('error')){
+                    notifyError(".main-submit-button","resource unavailable")
+                }else {
+                    if (result.hasOwnProperty('response')){
+                        let resource = result['response'];
 
-                            /*
-                            * now we have our result. If it has more than 1 element, than we have to display it using 'div_torrents'.
-                            * otherwise we can use 'div_single_result'
-                            * */
+                        /*
+                        * now we have our result. If it has more than 1 element, than we have to display it using 'div_torrents'.
+                        * otherwise we can use 'div_single_result'
+                        * */
 
-                            let singleResultDiv = $('#div_single_result');
-                            customHide(singleResultDiv);
+                        let singleResultDiv = $('#div_single_result');
+                        customHide(singleResultDiv);
 
-                            /*if (resources instanceof Array){
-                                if (resources.length > 1){
-                                    //use 'div_torrents'
-                                    //TODO
-                                    console.log("got more than 1 resource from a single ImdbID")
-                                }else if (resources.length > 0){
-                                    //use 'div_single_result'
+                        let singleResultDivBanner = $('#div_result_banner');
+                        let singleResultDivInfo = $('#div_result_info');
+                        let singleResultDivTorrents = $('#div_result_torrents');
 
-                                    let singleResultDivBanner = $('#div_result_banner');
-                                    let singleResultDivInfo = $('#div_result_info');
-                                    let singleResultDivTorrents = $('#div_result_torrents');
-                                    let singleResult = resources[0];
-
-
-                                    //  SET RESULT BANNER
-                                    if (singleResult.hasOwnProperty('images')){
-                                        let images = singleResult['images'];
-                                        if (images.hasOwnProperty('big')){
-                                            $('#img_resource_banner').attr("src",images["big"])
-                                        }else{
-                                            console.error("single resource has no image set")
-                                        }
-                                    }else{
-                                        console.error("single resource has no images")
-                                    }
-                                    //  SET RESULT INFO
-                                    $('#single_result_title').text(singleResult['title']);
-                                    $('#single_result_year').text(singleResult['year']);
-                                    if ( singleResult['genre'] instanceof Array){
-                                        $('#single_result_categories').text(singleResult['genre'].filter(Boolean).join(", "));
-                                    }
-                                    if ( singleResult['actors'] instanceof Array){
-                                        $('#single_result_stars').text(singleResult['actors'].filter(Boolean).join(", "));
-                                    }
-                                    if ( singleResult['directors'] instanceof Array){
-                                        $('#single_result_directors').text(singleResult['directors'].filter(Boolean).join(", "));
-                                    }
-
-                                    customShow(singleResultDiv);
-
-                                    fetchTorrent(inputName.val());
-                                }else{
-                                    notifyError(".main-submit-button" ,"resource not available");
-                                }
-                            }else{
-                                //it always has to be an array. If it is not, this is an error
-                                //TODO handle error
-                                notifyError(inputName ,"some error occurred","right");
-                                console.error("resources is not an array")
-                            }*/
-
-                            let singleResultDivBanner = $('#div_result_banner');
-                            let singleResultDivInfo = $('#div_result_info');
-                            let singleResultDivTorrents = $('#div_result_torrents');
-
-                            //  SET RESULT BANNER
-                            if (resource.hasOwnProperty('Poster')) {
-                                $('#img_resource_banner').attr("src", resource["Poster"])
-                            } else {
-                                console.error("single resource has no poster")
-                            }
-                            //  SET RESULT INFO
-                            $('#single_result_title').text(resource['Title']);
-                            $('#single_result_year').text(resource['Year']);
-                            $('#single_result_categories').text(resource["Genre"]);
-                            $('#single_result_stars').text(resource["Actors"]);
-                            $('#single_result_directors').text(resource["Director"]);
-
-                            customShow(singleResultDiv);
-
-                            fetchTorrent(inputName.val(),"movie");
+                        //  SET RESULT BANNER
+                        if (resource.hasOwnProperty('Poster')) {
+                            $('#img_resource_banner').attr("src", resource["Poster"])
                         } else {
-                            //TODO handle error, check first for 'error'
-
-                            notifyError(".main-submit-button","resource unavailable")
+                            console.error("single resource has no poster")
                         }
+                        //  SET RESULT INFO
+                        $('#single_result_title').text(resource['Title']);
+                        $('#single_result_year').text(resource['Year']);
+                        $('#single_result_categories').text(resource["Genre"]);
+                        $('#single_result_stars').text(resource["Actors"]);
+                        $('#single_result_directors').text(resource["Director"]);
+
+                        customShow(singleResultDiv);
+
+                        fetchTorrent(inputName.val(),"movie");
+                    } else {
+                        //TODO handle error, check first for 'error'
+
+                        notifyError(".main-submit-button","resource unavailable")
                     }
-                },
-                error: dealWithAjaxError,
-            });
-        }
+                }
+            },
+            error: dealWithAjaxError,
+        });
     });
 
     $("#main_submit_torrents").on("click",function (e) {
