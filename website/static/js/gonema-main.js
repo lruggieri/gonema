@@ -197,7 +197,7 @@ $(function() {
                                 $torrents_table.row.add([
                                     currentTorrent["name"],
                                     humanFileSize(currentTorrent["size"]),
-                                    '<a href="'+currentTorrent["magnet_link"]+'">Link</a>',
+                                    '<a class="magnet-link" href="'+currentTorrent["magnet_link"]+'"></a>',
                                     currentTorrent["peers"],
                                     formatFiles(currentTorrent["files"])
                                 ]).draw();

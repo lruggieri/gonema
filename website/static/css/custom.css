@@ -12,14 +12,6 @@ html {
     margin-bottom: 15px;
 }
 
-td.details-control {
-    background: url('../images/details_open.png') no-repeat center center;
-    cursor: pointer;
-}
-tr.shown td.details-control {
-    background: url('../images/details_close.png') no-repeat center center;
-}
-
 .main_div {
     height: 33%;
 }
@@ -45,11 +37,33 @@ tr.shown td.details-control {
 .main-search-box {
     width: 100%;
 }
-.main-logo{
+.main-logo {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+.magnet-link {
+    background-image: url("https://cdn0.iconfinder.com/data/icons/web-ui-vol-3/64/magnet-512.png");
+    background-size: 80%;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 50%;
+    background-clip: border-box;
+    transition: background-size 0.2s;
+    transition-timing-function: cubic-bezier(.07,1.41,.82,1.41);
+
+    display: block;
+    width: 30px;
+    height: 30px;
+    text-decoration: none;
+    cursor: pointer;
+    overflow: hidden;
+    text-indent: 100%;
+    white-space:nowrap;
+}
+.magnet-link:hover {
+    background-size: 100%;
 }
 /*.centered_image{
     position: absolute;
@@ -95,6 +109,8 @@ tr.shown td.details-control {
     display:table;
     margin:auto;
 }
+
+
 
 
 /* Input effects*/
