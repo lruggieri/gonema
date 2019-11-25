@@ -18,65 +18,70 @@ $(function() {
     });
 
     $("#main_submit_movies").on("click",function (e) {
+        e.preventDefault();
         let inputName = $("#inputNameMovies");
         let inputResourceImdbID = $("#inputResourceImdbID");
-        e.preventDefault();
-        displayLoadingSubmit();
-        $.ajax({
-            url : "/central",
-            type : 'POST',
-            cache : false,
-            data : {
-                ajax : true,
-                resourceName : inputName.val(),
-                resourceImdbID : inputResourceImdbID.val(),
-                action : "getResourceInfo",
-            },
-            success : function (result) {
-                hideLoadingSubmit();
-                if (result.hasOwnProperty('error')){
-                    notifyError(".main-submit-button","resource unavailable")
-                }else {
-                    if (result.hasOwnProperty('response')){
-                        let resource = result['response'];
 
-                        /*
-                        * now we have our result. If it has more than 1 element, than we have to display it using 'div_torrents'.
-                        * otherwise we can use 'div_single_result'
-                        * */
-
-                        let singleResultDiv = $('#div_single_result');
-                        customHide(singleResultDiv);
-
-                        let singleResultDivBanner = $('#div_result_banner');
-                        let singleResultDivInfo = $('#div_result_info');
-                        let singleResultDivTorrents = $('#div_result_torrents');
-
-                        //  SET RESULT BANNER
-                        if (resource.hasOwnProperty('Poster')) {
-                            $('#img_resource_banner').attr("src", resource["Poster"])
-                        } else {
-                            console.error("single resource has no poster")
-                        }
-                        //  SET RESULT INFO
-                        $('#single_result_title').text(resource['Title']);
-                        $('#single_result_year').text(resource['Year']);
-                        $('#single_result_categories').text(resource["Genre"]);
-                        $('#single_result_stars').text(resource["Actors"]);
-                        $('#single_result_directors').text(resource["Director"]);
-
-                        customShow(singleResultDiv);
-
-                        fetchTorrent(inputName.val(),"movie");
-                    } else {
-                        //TODO handle error, check first for 'error'
-
+        if (inputName.val().length === 0){
+            notifyError(inputName ,"Please specify a movie name","right");
+        }else{
+            displayLoadingSubmit();
+            $.ajax({
+                url : "/central",
+                type : 'POST',
+                cache : false,
+                data : {
+                    ajax : true,
+                    resourceName : inputName.val(),
+                    resourceImdbID : inputResourceImdbID.val(),
+                    action : "getResourceInfo",
+                },
+                success : function (result) {
+                    hideLoadingSubmit();
+                    if (result.hasOwnProperty('error')){
                         notifyError(".main-submit-button","resource unavailable")
+                    }else {
+                        if (result.hasOwnProperty('response')){
+                            let resource = result['response'];
+
+                            /*
+                            * now we have our result. If it has more than 1 element, than we have to display it using 'div_torrents'.
+                            * otherwise we can use 'div_single_result'
+                            * */
+
+                            let singleResultDiv = $('#div_single_result');
+                            customHide(singleResultDiv);
+
+                            let singleResultDivBanner = $('#div_result_banner');
+                            let singleResultDivInfo = $('#div_result_info');
+                            let singleResultDivTorrents = $('#div_result_torrents');
+
+                            //  SET RESULT BANNER
+                            if (resource.hasOwnProperty('Poster')) {
+                                $('#img_resource_banner').attr("src", resource["Poster"])
+                            } else {
+                                console.error("single resource has no poster")
+                            }
+                            //  SET RESULT INFO
+                            $('#single_result_title').text(resource['Title']);
+                            $('#single_result_year').text(resource['Year']);
+                            $('#single_result_categories').text(resource["Genre"]);
+                            $('#single_result_stars').text(resource["Actors"]);
+                            $('#single_result_directors').text(resource["Director"]);
+
+                            customShow(singleResultDiv);
+
+                            fetchTorrent(inputName.val(),"movie");
+                        } else {
+                            //TODO handle error, check first for 'error'
+
+                            notifyError(".main-submit-button","resource unavailable")
+                        }
                     }
-                }
-            },
-            error: dealWithAjaxError,
-        });
+                },
+                error: dealWithAjaxError,
+            });
+        }
     });
 
     $("#main_submit_torrents").on("click",function (e) {
