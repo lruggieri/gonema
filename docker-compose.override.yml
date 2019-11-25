@@ -3,17 +3,6 @@ version: '3.0'
 # DEVELOPMENT
 
 services:
-
-  gonemapi:
-    ports:
-      - 4242:8080 # callable from outside container network using port 4242
-    hostname: gonemapi
-    volumes:
-      - ./pkg:/visualResourceServer/pkg
-      - ./cmd/visualResourceServer:/visualResourceServer/cmd/visualResourceServer
-      - ./configs:/visualResourceServer/configs
-
-
   gonemaweb:
     ports:
       - 8080:8080
@@ -23,5 +12,11 @@ services:
       - ./website:/web/website
       - ./configs:/web/configs
     environment:
-      GONEMAPI_HOST: http://gonemapi
-      GONEMAPI_PORT: 8080 # using default internal network
+      GONEMAES_API_HOST: http://gonemaes_api
+      GONEMAES_API_PORT: 8080
+    networks:
+      - gonemadb_esnet
+
+networks:
+  gonemadb_esnet:
+    external: true

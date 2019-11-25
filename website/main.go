@@ -1,13 +1,10 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/lruggieri/gonema/website/controller"
 	"github.com/lruggieri/utils/netutil"
 	"html/template"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -50,12 +47,19 @@ func (nfs neuteredFileSystem) Open(path string) (http.File, error) {
 
 func main() {
 	templatesDir = os.Getenv("TEMPLATES_DIR")
+	if len(templatesDir) == 0{
+		templatesDir = "website/templates"
+	}
 	staticAssetDir = os.Getenv("STATIC_ASSET_DIR")
+	if len(staticAssetDir) == 0{
+		staticAssetDir = "website/static"
+	}
 
 	mux := http.NewServeMux()
 	fs := http.FileServer(neuteredFileSystem{http.Dir(staticAssetDir)})
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 	mux.HandleFunc("/favicon.ico",faviconHandler)
+	mux.HandleFunc("/robots.txt",robotsHandler)
 	mux.Handle("/central", netutil.HandleWithError(centralControllerHandler))
 	mux.HandleFunc("/", mainPageHandler)
 
@@ -94,6 +98,9 @@ func mainPageHandler(w http.ResponseWriter, r *http.Request){
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w,r,path.Join(staticAssetDir,"images","favicon.ico"))
 }
+func robotsHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w,r,path.Join("robots.txt"))
+}
 func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.ResponseLayout {
 
 	if r.Method == http.MethodPost{
@@ -103,16 +110,31 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.Re
 		case "getResourceInfo":{
 			resourceName := r.FormValue("resourceName")
 			resourceImdbID := r.FormValue("resourceImdbID")
-			resources, err := controller.GetResourceInfo(resourceName, resourceImdbID)
+			if len(resourceName) == 0 && len(resourceImdbID) == 0{
+				return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"no resource name or ID was given"}
+			}
+			resources, err := controller.GetResourceInfoFromOmdb(resourceName, resourceImdbID)
 			if err != nil{
-				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error()}
+				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
 			}
 			return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:resources}
+		}
+		case "getTorrents":{
+			keyword := r.FormValue("keyword")
+			if len(keyword) == 0{
+				return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid keyword when fetching torrents"}
+			}
+			torrents,err := controller.GetTorrents(keyword)
+			if err != nil{
+				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
+			}
+			return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:torrents}
 		}
 		case "suggest":{
 			resourceName := r.FormValue("resourceName")
 			if len(resourceName) > 0{
-				requestUrl := bytes.Buffer{}
+
+				/*requestUrl := bytes.Buffer{}
 				requestUrl.WriteString(os.Getenv("GONEMAES_API_HOST"))
 				port := os.Getenv("GONEMAES_API_PORT")
 				if len(port) > 0 {
@@ -158,7 +180,13 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.Re
 				return netutil.ResponseLayout{
 					StatusCode:http.StatusOK,
 					Response:respDecoded.Response,
+				}*/
+				resources, err := controller.GetResourceInfoFromOmdb(resourceName, "")
+				if err != nil{
+					return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
 				}
+				return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:resources}
+
 			}else{
 				return netutil.ResponseLayout{
 					StatusCode:http.StatusBadRequest,
@@ -175,7 +203,7 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.Re
 	}else{
 		return netutil.ResponseLayout{
 			StatusCode:http.StatusBadRequest,
-			Error:"expecting POST request to central, got ",
+			Error:"expecting POST request to central, got "+r.Method,
 		}
 	}
 }

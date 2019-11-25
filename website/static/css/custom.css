@@ -5,6 +5,21 @@ html {
     width: 100%;
 }
 
+.row {
+    margin-left: 5px;
+    margin-right: -5px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+td.details-control {
+    background: url('../images/details_open.png') no-repeat center center;
+    cursor: pointer;
+}
+tr.shown td.details-control {
+    background: url('../images/details_close.png') no-repeat center center;
+}
+
 .main_div {
     height: 33%;
 }
@@ -30,17 +45,19 @@ html {
 .main-search-box {
     width: 100%;
 }
-.centered_image{
+.main-logo{
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
-.full_div{
-    max-height: 100%;
-    max-width: 100%;
-}
-.full_div_image {
+/*.centered_image{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}*/
+.full_size {
     max-height: 100%;
     max-width: 100%;
 }
@@ -74,13 +91,14 @@ html {
     text-align: left;
     vertical-align: middle;
 }
-#submit_main_form {
+.main-submit-button {
     display:table;
     margin:auto;
 }
 
+
 /* Input effects*/
-span {
+.input-span {
     padding:10px;
     pointer-events: none;
     position:absolute;
@@ -98,10 +116,10 @@ input {
 
 input:focus + span, input:not(:placeholder-shown) + span {
     opacity:1;
-    transform: scale(0.75) translateY(-100%) translateX(-30px);
+    transform: scale(0.75) translateY(-90%) translateX(-30px);
 }
 /* For IE Browsers*/
 input:focus + span, input:not(:-ms-input-placeholder) + span {
     opacity:1;
-    transform: scale(0.75) translateY(-100%) translateX(-30px);
+    transform: scale(0.75) translateY(-90%) translateX(-30px);
 }

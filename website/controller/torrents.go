@@ -10,10 +10,10 @@ import (
 	"time"
 )
 
-func GetResourceInfo(resourceName, resourceImdbID string) (interface{}, error) {
+func GetTorrents(iKeyword string) (interface{}, error) {
 	gonemapiHost := os.Getenv("GONEMAES_API_HOST")
 	gonemapiPort := os.Getenv("GONEMAES_API_PORT")
-	mountPoint := "/resourceInfo"
+	mountPoint := "/torrents"
 
 	requestHostPort := gonemapiHost
 	if len(gonemapiPort) > 0{
@@ -30,8 +30,7 @@ func GetResourceInfo(resourceName, resourceImdbID string) (interface{}, error) {
 	}
 
 	reqQuery := req.URL.Query()
-	reqQuery.Add("resourceName",resourceName)
-	reqQuery.Add("imdbId",resourceImdbID)
+	reqQuery.Add("key", iKeyword)
 
 	req.URL.RawQuery = reqQuery.Encode()
 	//req.Header.Set(...,...)
