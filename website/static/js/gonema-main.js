@@ -3,6 +3,9 @@ $(function() {
     let $torrents_table_id = $('#table_torrents');
     let $torrents_table;
     resetTorrentDataTable();
+    $('.dataTables_length').addClass('bs-select');
+
+
     $(function () {
         $('[rel="popover"]').popover(
             {
@@ -11,18 +14,21 @@ $(function() {
         )
     });
 
-    $('.dataTables_length').addClass('bs-select');
+
 
     $("#form_search_movies").on("submit",function (e) {
         e.preventDefault();
-        console.log("trigger movie");
         $("#main_submit_movies").trigger('click');
+    });
+    $( "#inputNameMovies" ).on("input",function() {
+        $("#inputResourceImdbID").val("");
     });
     $("#form_search_torrents").on("submit",function (e) {
         e.preventDefault();
-        console.log("trigger torrents");
         $("#main_submit_torrents").trigger('click');
     });
+
+
 
     $("#main_submit_movies").on("click",function (e) {
         e.preventDefault();
