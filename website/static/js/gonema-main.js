@@ -3,6 +3,13 @@ $(function() {
     let $torrents_table_id = $('#table_torrents');
     let $torrents_table;
     resetTorrentDataTable();
+    $(function () {
+        $('[rel="popover"]').popover(
+            {
+                gpuAcceleration: !(window.devicePixelRatio < 1.5 && /Win/.test(navigator.platform))
+            }
+        )
+    });
 
     $('.dataTables_length').addClass('bs-select');
 
@@ -23,7 +30,7 @@ $(function() {
         let inputResourceImdbID = $("#inputResourceImdbID");
 
         if (inputName.val().length === 0){
-            notifyError(inputName ,"Please specify a movie name","right");
+            notifyErrorOnDiv(inputName ,"Please specify a movie name","right");
         }else{
             let singleResultDiv = $('#div_single_result');
             customHide(singleResultDiv);
@@ -43,7 +50,7 @@ $(function() {
                     success : function (result) {
                         hideLoadingSubmit();
                         if (result.hasOwnProperty('error')){
-                            notifyError(".main-submit-button","resource unavailable")
+                            notifyErrorOnDiv(".main-submit-button","resource unavailable")
                         }else {
                             if (result.hasOwnProperty('response')){
                                 let resource = result['response'];
@@ -78,7 +85,7 @@ $(function() {
                             } else {
                                 //TODO handle error, check first for 'error'
 
-                                notifyError(".main-submit-button","resource unavailable")
+                                notifyErrorOnDiv(".main-submit-button","resource unavailable")
                             }
                         }
                     },
@@ -94,7 +101,7 @@ $(function() {
         e.preventDefault();
         let inputName = $("#inputNameTorrents");
         if (inputName.val().length === 0){
-            notifyError(inputName ,"Please specify a torrent name","right");
+            notifyErrorOnDiv(inputName ,"Please specify a torrent name","right");
         }else{
             let singleResultDiv = $('#div_single_result');
             customHide(singleResultDiv);
@@ -204,19 +211,19 @@ $(function() {
                             }
                             customShow(torrentsDiv);
                         }else{
-                            notifyError(".main-submit-button" ,"resource not available");
+                            notifyErrorOnDiv(".main-submit-button" ,"resource not available");
                         }
                     }else{
                         //it always has to be an array. If it is not, this is an error
                         //TODO handle error
-                        notifyError($(".main-submit-button") ,"no torrent available","right");
+                        notifyErrorOnDiv($(".main-submit-button") ,"no torrent available","right");
                     }
 
                 }else{
                     hideLoadingSubmit();
                     //TODO handle error, check first for 'error'
 
-                    notifyError(".main-submit-button","some error occurred")
+                    notifyError("some error occurred")
                 }
 
             },
@@ -254,7 +261,7 @@ $(function() {
             return ""
         }
     }
-    function notifyError($notificationDiv, $message, $position){
+    function notifyErrorOnDiv($notificationDiv, $message, $position){
 
         if (typeof $position === "undefined" || !$position.length){
             $position = "bottom center"
@@ -263,7 +270,6 @@ $(function() {
         $($notificationDiv).notify(
                 $message,
                 {
-                    style: 'simplegreen',
                     position:$position,
                     showAnimation: 'slideDown',
                     showDuration: 400,
@@ -274,10 +280,12 @@ $(function() {
             );
     }
 
-    function displayLoadingSubmit(){
+    function displayLoadingSubmit(iSubmitButton){
+        $('.main-submit-button').attr("disabled",true);
         $('.spinner-submit').addClass("spinner-border spinner-border-sm")
     }
-    function hideLoadingSubmit(){
+    function hideLoadingSubmit(iSubmitButton){
+        $('.main-submit-button').removeAttr("disabled");
         $('.spinner-submit').removeClass("spinner-border spinner-border-sm")
     }
     function customShow($inputDiv){
@@ -315,20 +323,7 @@ $(function() {
 
     function dealWithAjaxError(request, status, error) {
         hideLoadingSubmit();
-        notifyError(".main-submit-button","Service unavailable. Sorry for the inconvenience.");
+        notifyError("Service unavailable. Sorry for the inconvenience.");
         console.log("StatusCode "+request.status+", response:"+request.responseText);
     }
-
-    $.notify.addStyle('simplegreen', {
-        html: "<div><span data-notify-text/></div>",
-        classes: {
-            base: {
-                "white-space": "nowrap",
-                "padding": "5px"
-            },
-            superblue: {
-                "color": "green",
-            }
-        }
-    });
 });

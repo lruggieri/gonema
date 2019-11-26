@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Gonema</title>
     <link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/animate.css">
     <link rel="stylesheet" type="text/css" href="../static/slick/slick.css"/>
     <link rel="stylesheet" type="text/css" href="../static/slick/slick-theme.css"/>
     <link rel="stylesheet" type="text/css" href="../static/css/custom.css">
@@ -12,11 +13,8 @@
     <!--    <link rel="stylesheet" type="text/css" href="../static/css/addons/datatables_nightly.min.css">  -->
     <link rel="stylesheet" type="text/css" href="../static/DataTables/datatables.min.css">
     <link rel="stylesheet" type="text/css" href="../static/DataTables/Responsive-2.2.3/css/responsive.dataTables.min.css">
-    <link type="text/css" rel="stylesheet" href="../static/css/jquery.qtip.min.css" />
 </head>
 <body>
-
-
 
 <div id="div_logo" class="main_div container-fluid">
     <img id="img_logo" class="main-logo" src="../static/images/logo4_3prongtree.png" />
@@ -28,10 +26,14 @@
         <div class="col-md-4 ">
             <ul id="search-nav" class="nav nav-tabs" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active" id="torrents-tab" href="#torrents" role="tab" data-toggle="tab" aria-controls="torrents">Torrents</a>
+                    <a class="nav-link active" id="torrents-tab" href="#torrents" role="tab" data-toggle="tab" aria-controls="torrents"
+                       rel="popover" data-trigger="hover" data-placement="top"
+                       data-content="General torrent search. No filter, everywhere that matches your input is returned">Torrents</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="movies-tab" href="#movies" role="tab" data-toggle="tab" aria-controls="movies" aria-expanded="true">Movies</a>
+                    <a class="nav-link" id="movies-tab" href="#movies" role="tab" data-toggle="tab" aria-controls="movies" aria-expanded="true"
+                       rel="popover" data-trigger="hover" data-placement="top"
+                       data-content="Movies only. Filters on the torrent files.">Movies</a>
                 </li>
             </ul>
 
@@ -155,16 +157,17 @@
 <script src="../static/js/jquery-3.4.1.min.js"></script>
 <script src="../static/js/jquery-ui.min.js"></script>
 <script src="../static/js/jquery.qtip.min.js"></script>
-<script src="../static/js/imagesloaded.pkgd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
 <script src="../static/js/notify.min.js"></script>
 <script src="../static/js/bootstrap.min.js"></script>
+<script src="../static/js/bootstrap-notify.min.js"></script>
 <script src="../static/slick/slick.min.js"></script>
 <script src="../static/js/gonema-main.js"></script>
+<script src="../static/js/notifications.js"></script>
 <script src="../static/js/qtips.js"></script>
 <!--<script src="../static/js/addons/datatables.min.js"></script> -->
 <script src="../static/DataTables/datatables.min.js"></script>
 <script src="../static/DataTables/Responsive-2.2.3/js/dataTables.responsive.min.js"></script>
-
 
 </body>
 </html>
