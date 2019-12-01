@@ -1,3 +1,5 @@
+[Website](https://gonemaweb.ruggieri.tech/)
+
 #### REASON
 I like movies!
 I like to watch some movie even twice ot 3 times, and I am not always
@@ -45,10 +47,6 @@ file. This means that you will have problems with the following environment vari
 you should delete this variable from the compose.override file, so that the main compose configuration
 will take place.
 
-
-#### API
-* Resource info: access to this API is available at [https://gonemapi.ruggieri.tech](https://gonemapi.ruggieri.tech)
-    * Documentation for this API [available here](cmd/visualResourceServer/README.md)
 
 #### TODO LIST (working on bolded)
 - [X] Finalize a first version of the API, capable of returning basic information
