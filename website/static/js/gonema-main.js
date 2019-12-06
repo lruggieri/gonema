@@ -207,14 +207,30 @@ $(function() {
                             //now fetch and populate torrent table
                             for(let i=0 ; i<torrents.length ; i++){
                                 let currentTorrent = torrents[i];
-                                $torrents_table.row.add([
+                                let newRow = $torrents_table.row.add([
                                     currentTorrent["name"],
                                     humanFileSize(currentTorrent["size"]),
                                     '<a class="magnet-link" href="'+currentTorrent["magnet_link"]+'"></a>',
                                     currentTorrent["peers"],
                                     formatFiles(currentTorrent["files"])
-                                ]).draw();
+                                ]).draw().node();
+                                if (currentTorrent.hasOwnProperty("poster")){
+                                    let poster = currentTorrent["poster"];
+                                    if (poster.length > 0){
+                                        $(newRow).attr('data-toggle','popover-hover');
+                                        $(newRow).attr('data-img',poster);
+                                    }
+                                }
+
                             }
+                            $('[data-toggle="popover-hover"]').popover({
+                                html: true,
+                                trigger: 'hover',
+                                content: function () {
+                                    console.log($(this).data('img'));
+                                    return '<img src="' + $(this).data('img') + '" />';
+                                }
+                            });
                             customShow(torrentsDiv);
                         }else{
                             notifyErrorOnDiv(".main-submit-button" ,"resource not available");
@@ -307,7 +323,16 @@ $(function() {
         $torrents_table = $torrents_table_id.DataTable(
             {
                 "aaSorting": [], //not sorting initially, preserving DB order (the user can choose after)
-                responsive: true
+                responsive: true,
+                drawCallback: function() {
+                    $('[data-toggle="popover-hover"]').popover({
+                        html: true,
+                        trigger: 'hover',
+                        content: function () {
+                            return "<img class='hover-img' src='" + $(this).data('img') + "'/>";
+                        }
+                    });
+                }
             }
         );
     }
