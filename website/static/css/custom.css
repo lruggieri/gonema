@@ -98,6 +98,9 @@ html {
 .hover-img{
     width: 100%;
 }
+.popover {
+    pointer-events: none;
+}
 
 #div_search {
     display: table;
