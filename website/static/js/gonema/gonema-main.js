@@ -16,6 +16,7 @@ $(function() {
 
 
 
+
     $("#form_search_movies").on("submit",function (e) {
         e.preventDefault();
         $("#main_submit_movies").trigger('click');
@@ -283,39 +284,6 @@ $(function() {
             return ""
         }
     }
-    function notifyErrorOnDiv($notificationDiv, $message, $position){
-
-        if (typeof $position === "undefined" || !$position.length){
-            $position = "bottom center"
-        }
-
-        $($notificationDiv).notify(
-                $message,
-                {
-                    position:$position,
-                    showAnimation: 'slideDown',
-                    showDuration: 400,
-                    autoHide: true,
-                    // if autoHide, hide after milliseconds
-                    autoHideDelay: 2000,
-                }
-            );
-    }
-
-    function displayLoadingSubmit(iSubmitButton){
-        $('.main-submit-button').attr("disabled",true);
-        $('.spinner-submit').addClass("spinner-border spinner-border-sm")
-    }
-    function hideLoadingSubmit(iSubmitButton){
-        $('.main-submit-button').removeAttr("disabled");
-        $('.spinner-submit').removeClass("spinner-border spinner-border-sm")
-    }
-    function customShow($inputDiv){
-        $inputDiv.show();
-    }
-    function customHide($inputDiv){
-        $inputDiv.hide();
-    }
 
     function resetTorrentDataTable(){
         $torrents_table_id.DataTable().clear();
@@ -335,26 +303,5 @@ $(function() {
                 }
             }
         );
-    }
-    function humanFileSize(bytes, si) {
-        var thresh = si ? 1000 : 1024;
-        if(Math.abs(bytes) < thresh) {
-            return bytes + ' B';
-        }
-        var units = si
-            ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
-            : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
-        var u = -1;
-        do {
-            bytes /= thresh;
-            ++u;
-        } while(Math.abs(bytes) >= thresh && u < units.length - 1);
-        return bytes.toFixed(1)+' '+units[u];
-    }
-
-    function dealWithAjaxError(request, status, error) {
-        hideLoadingSubmit();
-        notifyError("Service unavailable. Sorry for the inconvenience.");
-        console.log("StatusCode "+request.status+", response:"+request.responseText);
     }
 });

@@ -195,6 +195,21 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.Re
 				}
 			}
 		}
+		case "getAggregations":{
+			aggType := r.FormValue("aggType")
+			resType := r.FormValue("resType")
+			if len(aggType) == 0{
+				return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid aggType when getting aggregations"}
+			}
+			if len(resType) == 0{
+				return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid resType when getting aggregations"}
+			}
+			torrents,err := controller.GetAggregations(aggType,resType)
+			if err != nil{
+				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
+			}
+			return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:torrents}
+		}
 		default:
 			return netutil.ResponseLayout{
 				StatusCode:http.StatusBadRequest,

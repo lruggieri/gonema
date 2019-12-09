@@ -1,0 +1,54 @@
+.carousel-border {
+    opacity: 0.4;
+}
+.carousel-poster {
+    width: auto;
+    height: 225px;
+    max-height: 225px;
+    /*z-index: 10;*/
+}
+.carousel-inner {
+    /*z-index: -1;*/
+}
+
+.carousel-indicators li {
+    width: 30px;
+    height: 3px;
+    border-radius: 100%;
+    background-color: #007bff;
+    box-shadow: inset 1px 1px 1px 1px rgba(0,0,0,0.5);
+}
+.carousel-indicators {
+    bottom: -50px;
+}
+.carousel-indicators .active {
+    background-color: #0b15ff;
+}
+.carousel-control-next, .carousel-control-prev {
+    width: 5%;
+}
+
+.carousel-item {
+    transition-duration: 300ms;
+}
+
+.carousel-control-prev-icon{
+    height: 40px;
+    width: 40px;
+    outline: white;
+    border-radius: 100%;
+    border: 1px solid white;
+    background-color: white;
+    background-size: 50%, 50%;
+    background-image: url("../../images/left_arrow.png");
+}
+.carousel-control-next-icon{
+    height: 40px;
+    width: 40px;
+    outline: white;
+    border-radius: 100%;
+    border: 1px solid white;
+    background-color: white;
+    background-size: 50%, 50%;
+    background-image: url("../../images/right_arrow.png");
+}

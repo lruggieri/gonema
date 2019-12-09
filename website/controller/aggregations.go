@@ -10,10 +10,10 @@ import (
 	"time"
 )
 
-func GetTorrents(iKeyword, iType string) (interface{}, error) {
+func GetAggregations(iAggType, iresType string) (interface{}, error) {
 	gonemapiHost := os.Getenv("GONEMAES_API_HOST")
 	gonemapiPort := os.Getenv("GONEMAES_API_PORT")
-	mountPoint := "/torrents"
+	mountPoint := "/aggregations"
 
 	requestHostPort := gonemapiHost
 	if len(gonemapiPort) > 0{
@@ -30,8 +30,8 @@ func GetTorrents(iKeyword, iType string) (interface{}, error) {
 	}
 
 	reqQuery := req.URL.Query()
-	reqQuery.Add("key", iKeyword)
-	reqQuery.Add("type", iType)
+	reqQuery.Add("aggtype", iAggType)
+	reqQuery.Add("restype", iresType)
 
 	req.URL.RawQuery = reqQuery.Encode()
 	//req.Header.Set(...,...)
