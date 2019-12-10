@@ -6,13 +6,7 @@ $(function() {
     $('.dataTables_length').addClass('bs-select');
 
 
-    $(function () {
-        $('[rel="popover"]').popover(
-            {
-                gpuAcceleration: !(window.devicePixelRatio < 1.5 && /Win/.test(navigator.platform))
-            }
-        )
-    });
+    initPopovers();
 
 
 
@@ -208,30 +202,44 @@ $(function() {
                             //now fetch and populate torrent table
                             for(let i=0 ; i<torrents.length ; i++){
                                 let currentTorrent = torrents[i];
-                                let newRow = $torrents_table.row.add([
-                                    currentTorrent["name"],
-                                    humanFileSize(currentTorrent["size"]),
-                                    '<a class="magnet-link" href="'+currentTorrent["magnet_link"]+'"></a>',
-                                    currentTorrent["peers"],
-                                    formatFiles(currentTorrent["files"])
-                                ]).draw().node();
-                                if (currentTorrent.hasOwnProperty("poster")){
-                                    let poster = currentTorrent["poster"];
-                                    if (poster.length > 0){
-                                        $(newRow).attr('data-toggle','popover-hover');
-                                        $(newRow).attr('data-img',poster);
+                                if (currentTorrent.hasOwnProperty("name") && currentTorrent.hasOwnProperty("size") && currentTorrent.hasOwnProperty("magnet_link")
+                                    && currentTorrent.hasOwnProperty("peers") && currentTorrent.hasOwnProperty("files")){
+
+                                    let newRow = $torrents_table.row.add([
+                                        currentTorrent["name"],
+                                        humanFileSize(currentTorrent["size"]),
+                                        '<a class="magnet-link" href="'+currentTorrent["magnet_link"]+'" ' +
+                                        'rel="popover" ' +
+                                        'data-trigger="hover" ' +
+                                        'data-original-title="<strong>Magnet Link</strong>" ' +
+                                        'data-content="' +
+                                        'Clicking this link will open your default torrent BitTorrent client (eg. qBittorrent, Transmission, uTorrent etc...) " ' +
+                                        'data-html="true"></a>',
+                                        currentTorrent["peers"],
+                                        formatFiles(currentTorrent["files"])
+                                    ]).draw().node();
+                                    if (currentTorrent.hasOwnProperty("poster")){
+                                        let poster = currentTorrent["poster"];
+                                        if (poster.length > 0){
+                                            $(newRow).attr('data-toggle','popover-hover');
+                                            $(newRow).attr('data-img',poster);
+                                        }
                                     }
+                                }else{
+                                    console.log("currentTorrent is missing some property",currentTorrent);
                                 }
 
+
                             }
-                            $('[data-toggle="popover-hover"]').popover({
+                            /*$('[data-toggle="popover-hover"]').popover({
                                 html: true,
                                 trigger: 'hover',
                                 content: function () {
                                     console.log($(this).data('img'));
                                     return '<img src="' + $(this).data('img') + '" />';
                                 }
-                            });
+                            });*/
+                            initPopovers();
                             customShow(torrentsDiv);
                         }else{
                             notifyErrorOnDiv(".main-submit-button" ,"resource not available");
@@ -283,6 +291,14 @@ $(function() {
         }else{
             return ""
         }
+    }
+
+    function initPopovers(){
+        $('[rel="popover"]').popover(
+            {
+                gpuAcceleration: !(window.devicePixelRatio < 1.5 && /Win/.test(navigator.platform))
+            }
+        )
     }
 
     function resetTorrentDataTable(){
