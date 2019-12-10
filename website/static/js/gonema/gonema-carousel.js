@@ -56,37 +56,6 @@ $(function() {
 
 
     //ajax to fill each carousel
-
-    $.ajax({
-        url : "/central",
-        type : 'POST',
-        cache : false,
-        data : {
-            ajax : true,
-            aggType : "most_present",
-            resType : "movie",
-            action : "getAggregations",
-        },
-        success : function (result) {
-            buildCarousel('#carouselMoviesMostPresent',result)
-        },
-        error: dealWithAjaxError,
-    });
-    $.ajax({
-        url : "/central",
-        type : 'POST',
-        cache : false,
-        data : {
-            ajax : true,
-            aggType : "most_present",
-            resType : "serie",
-            action : "getAggregations",
-        },
-        success : function (result) {
-            buildCarousel('#carouselSeriesMostPresent',result)
-        },
-        error: dealWithAjaxError,
-    });
     $.ajax({
         url : "/central",
         type : 'POST',

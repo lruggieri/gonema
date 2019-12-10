@@ -5,17 +5,12 @@
     width: auto;
     height: 225px;
     max-height: 225px;
-    /*z-index: 10;*/
-}
-.carousel-inner {
-    /*z-index: -1;*/
 }
 
 .carousel-indicators li {
-    width: 30px;
-    height: 3px;
+    width: 10px;
+    height: 10px;
     border-radius: 100%;
-    background-color: #007bff;
     box-shadow: inset 1px 1px 1px 1px rgba(0,0,0,0.5);
 }
 .carousel-indicators {
