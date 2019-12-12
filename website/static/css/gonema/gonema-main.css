@@ -92,18 +92,6 @@ html {
     display: inline;
 }
 
-.slick-prev {
-    left: -2%;
-}
-
-.slick-next {
-    right: 2%;
-}
-
-.slick-prev:before, .slick-next:before {
-    color: #0000ff !important;
-}
-
 #div_logo {
     position: relative
 }
@@ -117,7 +105,7 @@ html {
     width: 100%;
 }
 
-.popover {
+.popover-poster {
     pointer-events: none;
 }
 
@@ -134,6 +122,14 @@ html {
 .main-submit-button {
     display: table;
     margin: auto;
+}
+
+.div_info_item_title {
+    font-weight: bold;
+    font-family: 'Chalkduster', fantasy !important;
+}
+.div_info_item_value {
+    font-family: 'Chalkduster', fantasy !important;
 }
 
 /*Carousel*/
@@ -158,6 +154,9 @@ html {
     top: 0;
     right: 0;
 }
+
+
+
 
 #para {
     border: 1px solid black;

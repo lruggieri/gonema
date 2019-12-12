@@ -9,8 +9,6 @@ $(function() {
     initPopovers();
 
 
-
-
     $("#form_search_movies").on("submit",function (e) {
         e.preventDefault();
         $("#main_submit_movies").trigger('click');
@@ -213,7 +211,12 @@ $(function() {
                                         'data-trigger="hover" ' +
                                         'data-original-title="<strong>Magnet Link</strong>" ' +
                                         'data-content="' +
-                                        'Clicking this link will open your default torrent BitTorrent client (eg. qBittorrent, Transmission, uTorrent etc...) " ' +
+                                        'Clicking this link will open your default torrent BitTorrent client (eg. qBittorrent, Transmission, uTorrent etc...) to start ' +
+                                        'the download.' +
+                                        '<br /> Do you still not have a torrent client? Check these out!' +
+                                        '<br /> <a href=\'https://www.qbittorrent.org\' target=\'_blank\'><b>qBittorrent<b/></a>' +
+                                        '<br /> <a href=\'https://transmissionbt.com/download\' target=\'_blank\'><b>Transmission<b/></a>' +
+                                        '<br /> <a href=\'https://www.utorrent.com\' target=\'_blank\'><b>uTorrent<b/></a>" ' +
                                         'data-html="true"></a>',
                                         currentTorrent["peers"],
                                         formatFiles(currentTorrent["files"])
@@ -223,6 +226,7 @@ $(function() {
                                         if (poster.length > 0){
                                             $(newRow).attr('data-toggle','popover-hover');
                                             $(newRow).attr('data-img',poster);
+                                            //pointer-events: none
                                         }
                                     }
                                 }else{
@@ -231,14 +235,6 @@ $(function() {
 
 
                             }
-                            /*$('[data-toggle="popover-hover"]').popover({
-                                html: true,
-                                trigger: 'hover',
-                                content: function () {
-                                    console.log($(this).data('img'));
-                                    return '<img src="' + $(this).data('img') + '" />';
-                                }
-                            });*/
                             initPopovers();
                             customShow(torrentsDiv);
                         }else{
@@ -293,12 +289,27 @@ $(function() {
         }
     }
 
-    function initPopovers(){
+    function initPopovers() {
         $('[rel="popover"]').popover(
             {
-                gpuAcceleration: !(window.devicePixelRatio < 1.5 && /Win/.test(navigator.platform))
-            }
-        )
+                html: true,
+                trigger: 'manual',
+            })
+            .on('mouseenter', function () {
+                var _this = this;
+                $(this).popover('show');
+                $('.popover').on('mouseleave', function () {
+                    $(_this).popover('hide');
+                });
+            })
+            .on('mouseleave', function () {
+            var _this = this;
+            setTimeout(function () {
+                if (!$('.popover:hover').length) {
+                    $(_this).popover('hide');
+                }
+            }, 300);
+        });
     }
 
     function resetTorrentDataTable(){
@@ -308,16 +319,24 @@ $(function() {
             {
                 "aaSorting": [], //not sorting initially, preserving DB order (the user can choose after)
                 responsive: true,
-                drawCallback: function() {
-                    $('[data-toggle="popover-hover"]').popover({
+                drawCallback: function () {
+                    let popoverTemplate = '<div class="popover popover-poster" role="tooltip"><div class="arrow"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>';
+                    let posters = $('[data-toggle="popover-hover"]');
+                    posters.popover({
                         html: true,
                         trigger: 'hover',
                         content: function () {
                             return "<img class='hover-img' src='" + $(this).data('img') + "'/>";
-                        }
-                    });
+                        },
+                        template:popoverTemplate
+                    })
                 }
             }
         );
     }
+
+    function getPopoverCustomTemplate(className) {
+        return '<div class="popover ' + className + '" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>';
+    }
+
 });
