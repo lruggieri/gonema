@@ -80,7 +80,7 @@ $(function() {
 
                                 customShow(singleResultDiv);
 
-                                fetchTorrent(inputName.val(),"movie");
+                                fetchTorrent(inputName.val(),inputResourceImdbID.val(),"movie");
                             } else {
                                 //TODO handle error, check first for 'error'
 
@@ -91,7 +91,7 @@ $(function() {
                     error: dealWithAjaxError,
                 });
             }else{
-                fetchTorrent(inputName.val(),"movie");
+                fetchTorrent(inputName.val(),inputResourceImdbID.val(),"movie");
             }
         }
     });
@@ -167,7 +167,7 @@ $(function() {
 
 
 
-    function fetchTorrent(iKeyword, iType){
+    function fetchTorrent(iKeyword, iImdbID, iType){
         displayLoadingSubmit();
         let torrentsDiv = $('#div_torrents');
         customHide(torrentsDiv);
@@ -178,6 +178,7 @@ $(function() {
             data : {
                 ajax : true,
                 keyword : iKeyword,
+                imdbID : iImdbID,
                 type: iType,
                 action : "getTorrents",
             },

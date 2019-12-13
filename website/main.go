@@ -121,11 +121,12 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.Re
 		}
 		case "getTorrents":{
 			keyword := r.FormValue("keyword")
+			imdbID := r.FormValue("imdbID")
 			tType := r.FormValue("type")
 			if len(keyword) == 0{
 				return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid keyword when fetching torrents"}
 			}
-			torrents,err := controller.GetTorrents(keyword,tType)
+			torrents,err := controller.GetTorrents(keyword,imdbID,tType)
 			if err != nil{
 				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
 			}
