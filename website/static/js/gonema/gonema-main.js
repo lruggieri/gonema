@@ -2,6 +2,7 @@ $(function() {
     //deal with main page form submission
     let $torrents_table_id = $('#table_torrents');
     let $torrents_table;
+    let $inputNameMovies = $('#inputNameMovies');
     resetTorrentDataTable();
     $('.dataTables_length').addClass('bs-select');
 
@@ -9,16 +10,21 @@ $(function() {
     initPopovers();
 
 
-    $("#form_search_movies").on("submit",function (e) {
-        e.preventDefault();
-        $("#main_submit_movies").trigger('click');
+    //
+    $("#form_search_movies").on("submit",function (e) {e.preventDefault();});
+    $inputNameMovies.on('keypress',function(e) {
+        if(e.which === 13) {
+            $("#main_submit_movies").trigger('click');
+        }
     });
-    $( "#inputNameMovies" ).on("input",function() {
+    $inputNameMovies.on("input",function() {
         $("#inputResourceImdbID").val("");
     });
-    $("#form_search_torrents").on("submit",function (e) {
-        e.preventDefault();
-        $("#main_submit_torrents").trigger('click');
+    $("#form_search_torrents").on("submit",function (e) {e.preventDefault();});
+    $('#inputNameTorrents').on('keypress',function(e) {
+        if(e.which === 13) {
+            $("#main_submit_torrents").trigger('click');
+        }
     });
 
 
@@ -108,7 +114,7 @@ $(function() {
         }
     });
 
-    $("#inputNameMovies").autocomplete({
+    $inputNameMovies.autocomplete({
         source: function(request, response) {
             $.ajax({
                 url : "/central",
