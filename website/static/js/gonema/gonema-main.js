@@ -225,7 +225,7 @@ $(function() {
                                     if (currentTorrent.hasOwnProperty("poster")){
                                         let poster = currentTorrent["poster"];
                                         if (poster.length > 0){
-                                            $(newRow).attr('data-toggle','popover-hover');
+                                            $(newRow).attr('data-toggle','popover-poster');
                                             $(newRow).attr('data-img',poster);
                                             //pointer-events: none
                                         }
@@ -233,8 +233,6 @@ $(function() {
                                 }else{
                                     console.log("currentTorrent is missing some property",currentTorrent);
                                 }
-
-
                             }
                             initPopovers();
                             customShow(torrentsDiv);
@@ -291,6 +289,10 @@ $(function() {
     }
 
     function initPopovers() {
+        initStandardPopover();
+        initPosterPopover();
+    }
+    function initStandardPopover(){
         $('[rel="popover"]').popover(
             {
                 html: true,
@@ -304,13 +306,23 @@ $(function() {
                 });
             })
             .on('mouseleave', function () {
-            var _this = this;
-            setTimeout(function () {
-                if (!$('.popover:hover').length) {
-                    $(_this).popover('hide');
-                }
-            }, 300);
-        });
+                var _this = this;
+                setTimeout(function () {
+                    if (!$('.popover:hover').length) {
+                        $(_this).popover('hide');
+                    }
+                }, 300);
+            });
+    }
+    function initPosterPopover(){
+        $('[data-toggle="popover-poster"]').popover({
+            html: true,
+            trigger: 'hover',
+            content: function () {
+                return "<img class='hover-img' src='" + $(this).data('img') + "'/>";
+            },
+            template:getPopoverCustomTemplate("popover-poster")
+        })
     }
 
     function resetTorrentDataTable(){
@@ -321,23 +333,14 @@ $(function() {
                 "aaSorting": [], //not sorting initially, preserving DB order (the user can choose after)
                 responsive: true,
                 drawCallback: function () {
-                    let popoverTemplate = '<div class="popover popover-poster" role="tooltip"><div class="arrow"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>';
-                    let posters = $('[data-toggle="popover-hover"]');
-                    posters.popover({
-                        html: true,
-                        trigger: 'hover',
-                        content: function () {
-                            return "<img class='hover-img' src='" + $(this).data('img') + "'/>";
-                        },
-                        template:popoverTemplate
-                    })
+                    initPosterPopover()
                 }
             }
         );
     }
 
     function getPopoverCustomTemplate(className) {
-        return '<div class="popover ' + className + '" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>';
+        return '<div class="popover '+className+'" role="tooltip"><div class="arrow"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>';
     }
 
 });
