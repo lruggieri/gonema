@@ -124,11 +124,11 @@ html {
     margin: auto;
 }
 
-.div_info_item_title {
+.div_info_item_title, .magnet-link-popup-header {
     font-weight: bold;
     font-family: 'Chalkduster', fantasy !important;
 }
-.div_info_item_value {
+.div_info_item_value, .magnet-link-popup-body {
     font-family: 'Chalkduster', fantasy !important;
 }
 

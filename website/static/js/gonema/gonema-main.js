@@ -210,14 +210,16 @@ $(function() {
                                         '<a class="magnet-link" href="'+currentTorrent["magnet_link"]+'" ' +
                                         'rel="popover" ' +
                                         'data-trigger="hover" ' +
-                                        'data-original-title="<strong>Magnet Link</strong>" ' +
+                                        'data-original-title="<a class=\'magnet-link-popup-header\'><strong>Magnet Link</strong></a>" ' +
                                         'data-content="' +
-                                        'Clicking this link will open your default torrent BitTorrent client (eg. qBittorrent, Transmission, uTorrent etc...) to start ' +
-                                        'the download.' +
-                                        '<br /> Do you still not have a torrent client? Check these out!' +
-                                        '<br /> <a href=\'https://www.qbittorrent.org\' target=\'_blank\'><b>qBittorrent<b/></a>' +
-                                        '<br /> <a href=\'https://transmissionbt.com/download\' target=\'_blank\'><b>Transmission<b/></a>' +
-                                        '<br /> <a href=\'https://www.utorrent.com\' target=\'_blank\'><b>uTorrent<b/></a>" ' +
+                                        '<a class=\'magnet-link-popup-body\'>' +
+                                            'Clicking this link will open your default torrent BitTorrent client (eg. qBittorrent, Transmission, uTorrent etc...) to start ' +
+                                            'the download.' +
+                                            '<br /> Do you still not have a torrent client? Check these out!' +
+                                            '<br /> <a href=\'https://www.qbittorrent.org\' target=\'_blank\'><b>qBittorrent<b/></a>' +
+                                            '<br /> <a href=\'https://transmissionbt.com/download\' target=\'_blank\'><b>Transmission<b/></a>' +
+                                            '<br /> <a href=\'https://www.utorrent.com\' target=\'_blank\'><b>uTorrent<b/></a>' +
+                                        '</a>"' +
                                         'data-html="true"></a>',
                                         currentTorrent["peers"],
                                         formatFiles(currentTorrent["files"])
