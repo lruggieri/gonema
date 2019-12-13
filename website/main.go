@@ -121,11 +121,12 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.Re
 		}
 		case "getTorrents":{
 			keyword := r.FormValue("keyword")
+			imdbID := r.FormValue("imdbID")
 			tType := r.FormValue("type")
 			if len(keyword) == 0{
 				return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid keyword when fetching torrents"}
 			}
-			torrents,err := controller.GetTorrents(keyword,tType)
+			torrents,err := controller.GetTorrents(keyword,imdbID,tType)
 			if err != nil{
 				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
 			}
@@ -194,6 +195,21 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.Re
 					Error:"invalid parameters",
 				}
 			}
+		}
+		case "getAggregations":{
+			aggType := r.FormValue("aggType")
+			resType := r.FormValue("resType")
+			if len(aggType) == 0{
+				return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid aggType when getting aggregations"}
+			}
+			if len(resType) == 0{
+				return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid resType when getting aggregations"}
+			}
+			torrents,err := controller.GetAggregations(aggType,resType)
+			if err != nil{
+				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
+			}
+			return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:torrents}
 		}
 		default:
 			return netutil.ResponseLayout{

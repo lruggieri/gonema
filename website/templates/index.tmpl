@@ -6,20 +6,19 @@
     <title>Gonema</title>
     <link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="../static/css/animate.css">
-    <link rel="stylesheet" type="text/css" href="../static/slick/slick.css"/>
-    <link rel="stylesheet" type="text/css" href="../static/slick/slick-theme.css"/>
-    <link rel="stylesheet" type="text/css" href="../static/css/custom.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/gonema/gonema-main.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/gonema/gonema-carousel.css">
     <link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.css">
-    <!--    <link rel="stylesheet" type="text/css" href="../static/css/addons/datatables_nightly.min.css">  -->
     <link rel="stylesheet" type="text/css" href="../static/DataTables/datatables.min.css">
     <link rel="stylesheet" type="text/css" href="../static/DataTables/Responsive-2.2.3/css/responsive.dataTables.min.css">
 </head>
 <body>
 
 <div id="div_logo" class="main_div container-fluid">
-    <img id="img_logo" class="main-logo" src="../static/images/logo4_3prongtree.png" />
+    <div class="row">
+        <img id="img_logo" class="main-logo" src="../static/images/logo4_3prongtree.png" />
+    </div>
 </div>
-
 <div id="div_search" class="main_div container-fluid">
     <div class="row">
         <div class="col-md-4 "></div>
@@ -27,13 +26,13 @@
             <ul id="search-nav" class="nav nav-tabs" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link active" id="movies-tab" href="#movies" role="tab" data-toggle="tab" aria-controls="movies" aria-expanded="true"
-                       rel="popover" data-trigger="hover" data-placement="top"
-                       data-content="Movies only. Filters on the torrent files.">Movies</a>
+                       rel="popover" data-placement="top"
+                       data-content="Filters on movies and series, excludes every other torrent.">Movies & Series</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="torrents-tab" href="#torrents" role="tab" data-toggle="tab" aria-controls="torrents"
-                       rel="popover" data-trigger="hover" data-placement="top"
-                       data-content="General torrent search. No filter, everything that matches your input is returned">Torrents</a>
+                       rel="popover" data-placement="top"
+                       data-content="Every torrent available, unfiltered.">Torrents</a>
                 </li>
             </ul>
 
@@ -52,11 +51,6 @@
                             <label class="col-md-12 custom_td">
                                 <input id="inputResourceImdbID" class="form-control main-search-box" name="source_imdbid" placeholder=" ">
                                 <span class="input-span">Imdb ID</span>
-                            </label>
-                        </div>
-                        <div id="immatrick" style="display: none">
-                            <label class="col-md-12 custom_td">
-                                <input type="submit" value="submit" />
                             </label>
                         </div>
                         <div class="form-group row">
@@ -94,8 +88,71 @@
         <div class="col-md-4 "></div>
     </div>
 </div>
+<div id="div_slideshow" class="main_div container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <ul id="search-nav" class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="slideshow_most_shared" href="#most_shared" role="tab" data-toggle="tab" aria-controls="most_shared" aria-expanded="true"
+                       rel="popover" data-placement="top"
+                       data-original-title="<strong>Most Shared</strong>"
+                       data-content="The most shared (with the greatest amount of peers) movies and series torrents, by users <strong>all around the world</strong>"
+                       data-html="true">Most Shared</a>
+                </li>
+            </ul>
 
-<div class="main_div container-fluid">
+            <div id="slideshow_nav_content" class="tab-content">
+                <div role="tabpanel" class="tab-pane fade show active" id="most_shared" aria-labelledby="most_shared_tab">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col"><hr></div>
+                                <div class="col-auto carousel-border">Movies</div>
+                                <div class="col"><hr></div>
+                            </div>
+                            <div id="carouselMoviesMostShared" class="carousel slide" data-ride="carousel">
+                                <ol class="carousel-indicators"></ol>
+                                <div class="carousel-inner">
+                                </div>
+                                <a class="carousel-control-prev" href="#carouselMoviesMostShared" role="button" data-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                                <a class="carousel-control-next" href="#carouselMoviesMostShared" role="button" data-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col"><hr></div>
+                                <div class="col-auto carousel-border">Series</div>
+                                <div class="col"><hr></div>
+                            </div>
+                            <div id="carouselSeriesMostShared" class="carousel slide" data-ride="carousel">
+                                <ol class="carousel-indicators"></ol>
+                                <div class="carousel-inner">
+                                </div>
+                                <a class="carousel-control-prev" href="#carouselSeriesMostShared" role="button" data-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                                <a class="carousel-control-next" href="#carouselSeriesMostShared" role="button" data-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div id="div_results" class="main_div container-fluid">
 
     <div id="div_single_result" class="row" style="display: none">
             <div id="div_result_banner" class="col-md-2 child_image_container div_result">
@@ -103,24 +160,24 @@
             </div>
             <div id="div_result_info" class="col-md-10 div_result">
                 <div class="div_info_item">
-                    <h4 class="inline">Title:</h4>
-                    <a id="single_result_title"></a>
+                    <h4 class="inline div_info_item_title">Title:</h4>
+                    <a  class="div_info_item_value" id="single_result_title"></a>
                 </div>
                 <div class="div_info_item">
-                    <h4 class="inline">Year:</h4>
-                    <a id="single_result_year"></a>
+                    <h4 class="inline div_info_item_title">Year:</h4>
+                    <a5  class="div_info_item_value" id="single_result_year"></a5>
                 </div>
                 <div class="div_info_item">
-                    <h4 class="inline">Categories:</h4>
-                    <a id="single_result_categories"></a>
+                    <h4 class="inline div_info_item_title">Categories:</h4>
+                    <a  class="div_info_item_value" id="single_result_categories"></a>
                 </div>
                 <div class="div_info_item">
-                    <h4 class="inline">Stars:</h4>
-                    <a id="single_result_stars"></a>
+                    <h4 class="inline div_info_item_title">Stars:</h4>
+                    <a  class="div_info_item_value" id="single_result_stars"></a>
                 </div>
                 <div class="div_info_item">
-                    <h4 class="inline">Directors:</h4>
-                    <a id="single_result_directors"></a>
+                    <h4 class="inline div_info_item_title">Directors:</h4>
+                    <a  class="div_info_item_value" id="single_result_directors"></a>
                 </div>
             </div>
     </div>
@@ -131,7 +188,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Size</th>
-                    <th>Magnet Link</th>
+                    <th>Download</th>
                     <th>Peers</th>
                     <th class="none">Files</th>
                 </tr>
@@ -140,7 +197,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Size</th>
-                    <th>Magnet Link</th>
+                    <th>Download</th>
                     <th>Peers</th>
                     <th>Files</th>
                 </tr>
@@ -157,14 +214,15 @@
 <script src="../static/js/jquery-3.4.1.min.js"></script>
 <script src="../static/js/jquery-ui.min.js"></script>
 <script src="../static/js/jquery.qtip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+<script src="../static/js/popper_1.11.0.min.js"></script>
 <script src="../static/js/notify.min.js"></script>
 <script src="../static/js/bootstrap.min.js"></script>
 <script src="../static/js/bootstrap-notify.min.js"></script>
-<script src="../static/slick/slick.min.js"></script>
-<script src="../static/js/gonema-main.js"></script>
-<script src="../static/js/notifications.js"></script>
-<!--<script src="../static/js/addons/datatables.min.js"></script> -->
+<script src="../static/js/gonema/common.js"></script>
+<script src="../static/js/gonema/gonema-main.js"></script>
+<script src="../static/js/gonema/gonema-carousel.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery.touchswipe/1.6.4/jquery.touchSwipe.min.js'></script>
+<script src="../static/js/gonema/notifications.js"></script>
 <script src="../static/DataTables/datatables.min.js"></script>
 <script src="../static/DataTables/Responsive-2.2.3/js/dataTables.responsive.min.js"></script>
 

@@ -13,36 +13,46 @@ html {
 }
 
 .main_div {
-    height: 33%;
+    height: 250px;
+    display: table;
 }
+
 .div_result {
     word-wrap: break-word;
 }
-.child_image_container{
+
+.child_image_container {
     height: 100%;
     width: 100%;
 }
+
 .custom_tr {
     display: table-row;
 }
+
 .custom_td {
     padding: 0;
 }
+
 .empty_column {
     width: 20%;
 }
+
 .search_column {
     width: 60%;
 }
+
 .main-search-box {
     width: 100%;
 }
+
 .main-logo {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
 .magnet-link {
     background-image: url("https://cdn0.iconfinder.com/data/icons/web-ui-vol-3/64/magnet-512.png");
     background-size: 80%;
@@ -51,7 +61,7 @@ html {
     border-radius: 50%;
     background-clip: border-box;
     transition: background-size 0.2s;
-    transition-timing-function: cubic-bezier(.07,1.41,.82,1.41);
+    transition-timing-function: cubic-bezier(.07, 1.41, .82, 1.41);
 
     display: block;
     width: 30px;
@@ -60,11 +70,13 @@ html {
     cursor: pointer;
     overflow: hidden;
     text-indent: 100%;
-    white-space:nowrap;
+    white-space: nowrap;
 }
+
 .magnet-link:hover {
     background-size: 100%;
 }
+
 /*.centered_image{
     position: absolute;
     top: 50%;
@@ -75,25 +87,26 @@ html {
     max-height: 100%;
     max-width: 100%;
 }
-.inline{
+
+.inline {
     display: inline;
-}
-.slick-prev {
-    left: -2%;
-}
-.slick-next {
-    right: 2%;
-}
-.slick-prev:before, .slick-next:before {
-    color: #0000ff !important;
 }
 
 #div_logo {
     position: relative
 }
+
 #img_logo {
     max-height: 60%;
     max-width: 60%;
+}
+
+.hover-img {
+    width: 100%;
+}
+
+.popover-poster {
+    pointer-events: none;
 }
 
 #div_search {
@@ -105,9 +118,34 @@ html {
     text-align: left;
     vertical-align: middle;
 }
+
 .main-submit-button {
-    display:table;
-    margin:auto;
+    display: table;
+    margin: auto;
+}
+
+.div_info_item_title, .magnet-link-popup-header {
+    font-weight: bold;
+    font-family: 'Chalkduster', fantasy !important;
+}
+.div_info_item_value, .magnet-link-popup-body {
+    font-family: 'Chalkduster', fantasy !important;
+}
+
+/*Carousel*/
+.g-scrolling-carousel .items {
+    padding: 5px 0;
+
+}
+
+.g-scrolling-carousel .items img {
+    display: inline-block;
+    margin-right: 10px;
+    width: 170px;
+    height: 150px;
+    line-height: 150px;
+    box-shadow: 0 0 5px #000;
+    text-align: center;
 }
 
 /*Alerting*/
@@ -116,44 +154,52 @@ html {
     top: 0;
     right: 0;
 }
+
+
+
+
 #para {
     border: 1px solid black;
     width: 300px;
     height: 100px;
     overflow: scroll;
 }
+
 .toast-color {
     color: white;
     background-color: #33b5e5;
 }
+
 h1 {
-    color:green;
+    color: green;
 }
 
 
 /* Input effects*/
 .input-span {
-    padding:10px;
+    padding: 10px;
     pointer-events: none;
-    position:absolute;
-    left:0;
-    top:0;
+    position: absolute;
+    left: 0;
+    top: 0;
     transition: 0.2s;
     transition-timing-function: ease;
     transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
-    opacity:0.5;
+    opacity: 0.5;
     width: 100%;
 }
+
 input {
-    padding:10px;
+    padding: 10px;
 }
 
 input:focus + span, input:not(:placeholder-shown) + span {
-    opacity:1;
+    opacity: 1;
     transform: scale(0.75) translateY(-90%) translateX(-30px);
 }
+
 /* For IE Browsers*/
 input:focus + span, input:not(:-ms-input-placeholder) + span {
-    opacity:1;
+    opacity: 1;
     transform: scale(0.75) translateY(-90%) translateX(-30px);
 }

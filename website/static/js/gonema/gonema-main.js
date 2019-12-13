@@ -2,30 +2,29 @@ $(function() {
     //deal with main page form submission
     let $torrents_table_id = $('#table_torrents');
     let $torrents_table;
+    let $inputNameMovies = $('#inputNameMovies');
     resetTorrentDataTable();
     $('.dataTables_length').addClass('bs-select');
 
 
-    $(function () {
-        $('[rel="popover"]').popover(
-            {
-                gpuAcceleration: !(window.devicePixelRatio < 1.5 && /Win/.test(navigator.platform))
-            }
-        )
+    initPopovers();
+
+
+    //
+    $("#form_search_movies").on("submit",function (e) {e.preventDefault();});
+    $inputNameMovies.on('keypress',function(e) {
+        if(e.which === 13) {
+            $("#main_submit_movies").trigger('click');
+        }
     });
-
-
-
-    $("#form_search_movies").on("submit",function (e) {
-        e.preventDefault();
-        $("#main_submit_movies").trigger('click');
-    });
-    $( "#inputNameMovies" ).on("input",function() {
+    $inputNameMovies.on("input",function() {
         $("#inputResourceImdbID").val("");
     });
-    $("#form_search_torrents").on("submit",function (e) {
-        e.preventDefault();
-        $("#main_submit_torrents").trigger('click');
+    $("#form_search_torrents").on("submit",function (e) {e.preventDefault();});
+    $('#inputNameTorrents').on('keypress',function(e) {
+        if(e.which === 13) {
+            $("#main_submit_torrents").trigger('click');
+        }
     });
 
 
@@ -87,7 +86,7 @@ $(function() {
 
                                 customShow(singleResultDiv);
 
-                                fetchTorrent(inputName.val(),"movie");
+                                fetchTorrent(inputName.val(),inputResourceImdbID.val(),"movie");
                             } else {
                                 //TODO handle error, check first for 'error'
 
@@ -98,7 +97,7 @@ $(function() {
                     error: dealWithAjaxError,
                 });
             }else{
-                fetchTorrent(inputName.val(),"movie");
+                fetchTorrent(inputName.val(),inputResourceImdbID.val(),"movie");
             }
         }
     });
@@ -115,7 +114,7 @@ $(function() {
         }
     });
 
-    $("#inputNameMovies").autocomplete({
+    $inputNameMovies.autocomplete({
         source: function(request, response) {
             $.ajax({
                 url : "/central",
@@ -174,7 +173,7 @@ $(function() {
 
 
 
-    function fetchTorrent(iKeyword, iType){
+    function fetchTorrent(iKeyword, iImdbID, iType){
         displayLoadingSubmit();
         let torrentsDiv = $('#div_torrents');
         customHide(torrentsDiv);
@@ -185,6 +184,7 @@ $(function() {
             data : {
                 ajax : true,
                 keyword : iKeyword,
+                imdbID : iImdbID,
                 type: iType,
                 action : "getTorrents",
             },
@@ -207,14 +207,42 @@ $(function() {
                             //now fetch and populate torrent table
                             for(let i=0 ; i<torrents.length ; i++){
                                 let currentTorrent = torrents[i];
-                                $torrents_table.row.add([
-                                    currentTorrent["name"],
-                                    humanFileSize(currentTorrent["size"]),
-                                    '<a class="magnet-link" href="'+currentTorrent["magnet_link"]+'"></a>',
-                                    currentTorrent["peers"],
-                                    formatFiles(currentTorrent["files"])
-                                ]).draw();
+                                if (currentTorrent.hasOwnProperty("name") && currentTorrent.hasOwnProperty("size") && currentTorrent.hasOwnProperty("magnet_link")
+                                    && currentTorrent.hasOwnProperty("peers") && currentTorrent.hasOwnProperty("files")){
+
+                                    let newRow = $torrents_table.row.add([
+                                        currentTorrent["name"],
+                                        humanFileSize(currentTorrent["size"]),
+                                        '<a class="magnet-link" href="'+currentTorrent["magnet_link"]+'" ' +
+                                        'rel="popover" ' +
+                                        'data-trigger="hover" ' +
+                                        'data-original-title="<a class=\'magnet-link-popup-header\'><strong>Magnet Link</strong></a>" ' +
+                                        'data-content="' +
+                                        '<a class=\'magnet-link-popup-body\'>' +
+                                            'Clicking this link will open your default torrent BitTorrent client (eg. qBittorrent, Transmission, uTorrent etc...) to start ' +
+                                            'the download.' +
+                                            '<br /> Do you still not have a torrent client? Check these out!' +
+                                            '<br /> <a href=\'https://www.qbittorrent.org\' target=\'_blank\'><b>qBittorrent<b/></a>' +
+                                            '<br /> <a href=\'https://transmissionbt.com/download\' target=\'_blank\'><b>Transmission<b/></a>' +
+                                            '<br /> <a href=\'https://www.utorrent.com\' target=\'_blank\'><b>uTorrent<b/></a>' +
+                                        '</a>"' +
+                                        'data-html="true"></a>',
+                                        currentTorrent["peers"],
+                                        formatFiles(currentTorrent["files"])
+                                    ]).draw().node();
+                                    if (currentTorrent.hasOwnProperty("poster")){
+                                        let poster = currentTorrent["poster"];
+                                        if (poster.length > 0){
+                                            $(newRow).attr('data-toggle','popover-poster');
+                                            $(newRow).attr('data-img',poster);
+                                            //pointer-events: none
+                                        }
+                                    }
+                                }else{
+                                    console.log("currentTorrent is missing some property",currentTorrent);
+                                }
                             }
+                            initPopovers();
                             customShow(torrentsDiv);
                         }else{
                             notifyErrorOnDiv(".main-submit-button" ,"resource not available");
@@ -267,38 +295,42 @@ $(function() {
             return ""
         }
     }
-    function notifyErrorOnDiv($notificationDiv, $message, $position){
 
-        if (typeof $position === "undefined" || !$position.length){
-            $position = "bottom center"
-        }
-
-        $($notificationDiv).notify(
-                $message,
-                {
-                    position:$position,
-                    showAnimation: 'slideDown',
-                    showDuration: 400,
-                    autoHide: true,
-                    // if autoHide, hide after milliseconds
-                    autoHideDelay: 2000,
-                }
-            );
+    function initPopovers() {
+        initStandardPopover();
+        initPosterPopover();
     }
-
-    function displayLoadingSubmit(iSubmitButton){
-        $('.main-submit-button').attr("disabled",true);
-        $('.spinner-submit').addClass("spinner-border spinner-border-sm")
+    function initStandardPopover(){
+        $('[rel="popover"]').popover(
+            {
+                html: true,
+                trigger: 'manual',
+            })
+            .on('mouseenter', function () {
+                var _this = this;
+                $(this).popover('show');
+                $('.popover').on('mouseleave', function () {
+                    $(_this).popover('hide');
+                });
+            })
+            .on('mouseleave', function () {
+                var _this = this;
+                setTimeout(function () {
+                    if (!$('.popover:hover').length) {
+                        $(_this).popover('hide');
+                    }
+                }, 300);
+            });
     }
-    function hideLoadingSubmit(iSubmitButton){
-        $('.main-submit-button').removeAttr("disabled");
-        $('.spinner-submit').removeClass("spinner-border spinner-border-sm")
-    }
-    function customShow($inputDiv){
-        $inputDiv.show();
-    }
-    function customHide($inputDiv){
-        $inputDiv.hide();
+    function initPosterPopover(){
+        $('[data-toggle="popover-poster"]').popover({
+            html: true,
+            trigger: 'hover',
+            content: function () {
+                return "<img class='hover-img' src='" + $(this).data('img') + "'/>";
+            },
+            template:getPopoverCustomTemplate("popover-poster")
+        })
     }
 
     function resetTorrentDataTable(){
@@ -307,29 +339,16 @@ $(function() {
         $torrents_table = $torrents_table_id.DataTable(
             {
                 "aaSorting": [], //not sorting initially, preserving DB order (the user can choose after)
-                responsive: true
+                responsive: true,
+                drawCallback: function () {
+                    initPosterPopover()
+                }
             }
         );
     }
-    function humanFileSize(bytes, si) {
-        var thresh = si ? 1000 : 1024;
-        if(Math.abs(bytes) < thresh) {
-            return bytes + ' B';
-        }
-        var units = si
-            ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
-            : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
-        var u = -1;
-        do {
-            bytes /= thresh;
-            ++u;
-        } while(Math.abs(bytes) >= thresh && u < units.length - 1);
-        return bytes.toFixed(1)+' '+units[u];
+
+    function getPopoverCustomTemplate(className) {
+        return '<div class="popover '+className+'" role="tooltip"><div class="arrow"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>';
     }
 
-    function dealWithAjaxError(request, status, error) {
-        hideLoadingSubmit();
-        notifyError("Service unavailable. Sorry for the inconvenience.");
-        console.log("StatusCode "+request.status+", response:"+request.responseText);
-    }
 });

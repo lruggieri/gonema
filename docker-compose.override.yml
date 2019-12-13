@@ -14,7 +14,3 @@ services:
     environment:
       GONEMAES_API_HOST: http://gonemaes_api
       GONEMAES_API_PORT: 8080
-
-networks:
-  gonemadb_esnet:
-    external: true
