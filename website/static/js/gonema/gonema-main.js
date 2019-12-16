@@ -4,7 +4,7 @@ $(function() {
     let $torrents_table;
     let $inputNameMovies = $('#inputNameMovies');
     resetTorrentDataTable();
-    $('.dataTables_length').addClass('bs-select');
+    //$('.dataTables_length').addClass('bs-select');
 
 
     initPopovers();
@@ -77,6 +77,8 @@ $(function() {
                                 } else {
                                     console.error("single resource has no poster")
                                 }
+
+
                                 //  SET RESULT INFO
                                 $('#single_result_title').text(resource['Title']);
                                 $('#single_result_year').text(resource['Year']);
@@ -213,6 +215,7 @@ $(function() {
                                     let newRow = $torrents_table.row.add([
                                         currentTorrent["name"],
                                         humanFileSize(currentTorrent["size"]),
+                                        currentTorrent["peers"],
                                         '<a class="magnet-link" href="'+currentTorrent["magnet_link"]+'" ' +
                                         'rel="popover" ' +
                                         'data-trigger="hover" ' +
@@ -227,22 +230,27 @@ $(function() {
                                             '<br /> <a href=\'https://www.utorrent.com\' target=\'_blank\'><b>uTorrent<b/></a>' +
                                         '</a>"' +
                                         'data-html="true"></a>',
-                                        currentTorrent["peers"],
                                         formatFiles(currentTorrent["files"])
                                     ]).draw().node();
-                                    if (currentTorrent.hasOwnProperty("poster")){
-                                        let poster = currentTorrent["poster"];
-                                        if (poster.length > 0){
-                                            $(newRow).attr('data-toggle','popover-poster');
-                                            $(newRow).attr('data-img',poster);
-                                            //pointer-events: none
+
+                                    //no poster on mobile, if's annoying
+                                    if (!isMobile){
+                                        if (currentTorrent.hasOwnProperty("poster")){
+                                            let poster = currentTorrent["poster"];
+                                            if (poster.length > 0){
+                                                $(newRow).attr('data-toggle','popover-poster');
+                                                $(newRow).attr('data-img',poster);
+                                                //pointer-events: none
+                                            }
                                         }
                                     }
+
                                 }else{
                                     console.log("currentTorrent is missing some property",currentTorrent);
                                 }
                             }
                             initPopovers();
+
                             customShow(torrentsDiv);
 
                             //bring user to the result
@@ -349,7 +357,7 @@ $(function() {
                     initPosterPopover()
                 }
             }
-        );
+        ).columns.adjust().responsive.recalc();
     }
 
     function getPopoverCustomTemplate(className) {
