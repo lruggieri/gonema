@@ -244,6 +244,11 @@ $(function() {
                             }
                             initPopovers();
                             customShow(torrentsDiv);
+
+                            //bring user to the result
+                            $('html, body').animate({
+                                scrollTop: $("#div_results").offset().top
+                            }, 500);
                         }else{
                             notifyErrorOnDiv(".main-submit-button" ,"resource not available");
                         }
