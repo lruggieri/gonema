@@ -20,12 +20,14 @@
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Gonema</title>
+
+    <title>Gonema - Your clean torrent search engine</title>
+
     <link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="../static/css/animate.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="../static/css/gonema/gonema-main.css">
     <link rel="stylesheet" type="text/css" href="../static/css/gonema/gonema-carousel.css">
-    <link rel="stylesheet" type="text/css" href="../static/css/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="../static/DataTables/datatables.min.css">
     <link rel="stylesheet" type="text/css" href="../static/DataTables/Responsive-2.2.3/css/responsive.dataTables.min.css">
 </head>
@@ -36,8 +38,13 @@
 <!-- End Google Tag Manager (noscript) -->
 
 <div id="div_logo" class="main_div container-fluid">
-    <div class="row">
-        <img id="img_logo" class="main-logo" src="../static/images/logo5_boh.png" />
+    <div class="row logo-row">
+        <div class="col-md-3"> </div>
+        <div class="col-md-6">
+            <img id="img_logo" class="main-logo" alt="Gonema" src="../static/images/logo5_boh.png" />
+            <span class="caption main-subtitle">Your clean torrent search engine</span>
+        </div>
+        <div class="col-md-3"></div>
     </div>
 </div>
 <div id="div_search" class="main_div container-fluid">
@@ -207,10 +214,10 @@
             <table id="table_torrents" class="table table-hover table-striped dt-responsive" cellspacing="0" width="100%">
                 <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Size</th>
+                    <th class="all">Name</th>
+                    <th class="all">Size</th>
                     <th>Peers</th>
-                    <th>Download</th>
+                    <th class="all">Download</th>
                     <th class="none">Files</th>
                 </tr>
                 </thead>

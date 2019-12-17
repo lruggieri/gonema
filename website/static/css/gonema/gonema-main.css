@@ -48,11 +48,47 @@ html {
 }
 
 .main-logo {
+    width: 80%;
+    margin: auto;
+    display: block;
+    padding-top: 5%;
+}
+.main-subtitle {
+    margin: auto;
+    display: block;
+    text-align: center;
+    font-family: 'Chalkduster', fantasy !important;
+    font-size: 30px;
+    /*color: #000; !* Fallback for older browsers *!
+    color: rgba(0, 0, 0, 0.5);
+    text-shadow: -1px -1px 3px #000000;*/
+
+    text-shadow: 1px 1px 1px #000000;
+    color: #ffffff;
+    opacity: 0.3;
+}
+
+/*#div_logo {
+    position: relative
+}
+
+#img_logo {
+    max-height: 60%;
+    max-width: 60%;
+}
+
+.main-logo{
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
+.main-subtitle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, 100%);
+}*/
 
 .magnet-link {
     background-image: url("https://cdn0.iconfinder.com/data/icons/web-ui-vol-3/64/magnet-512.png");
@@ -91,15 +127,6 @@ html {
 
 .inline {
     display: inline;
-}
-
-#div_logo {
-    position: relative
-}
-
-#img_logo {
-    max-height: 60%;
-    max-width: 60%;
 }
 
 .hover-img {
