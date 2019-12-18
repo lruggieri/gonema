@@ -2,9 +2,14 @@
     opacity: 0.4;
 }
 .carousel-poster {
-    width: auto;
     height: 225px;
     max-height: 225px;
+}
+@media screen and (max-width: 425px){
+    .carousel-poster {
+        height: auto;
+        max-height: none;
+    }
 }
 
 .carousel-indicators li {

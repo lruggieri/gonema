@@ -41,7 +41,7 @@ $(function() {
             customHide(singleResultDiv);
             displayLoadingSubmit();
 
-            if (inputResourceImdbID.val().length > 0){
+            if (inputResourceImdbID.val().length > 0 && !isMobile){
                 $.ajax({
                     url : "/central",
                     type : 'POST',
