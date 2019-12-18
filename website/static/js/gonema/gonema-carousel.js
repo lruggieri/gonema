@@ -1,5 +1,10 @@
 $(function() {
     let maxSlidePerCarousel = 5;
+    if (isMobile) {
+        maxSlidePerCarousel = 1;
+    }
+
+
     let carouselClass =  $('.carousel');
     //carouselClass.carousel(); //unnecessary because of  data-ride
     carouselClass.swipe({
@@ -124,7 +129,7 @@ $(function() {
                             href.appendTo(col);
                             col.appendTo(currentRow);
 
-                            if (i !== 0 && (i+1) % maxSlidePerCarousel === 0){
+                            if ((i+1) % maxSlidePerCarousel === 0){
                                 insert();
                             }
                         }

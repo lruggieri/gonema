@@ -15,6 +15,7 @@ html {
 .main_div {
     height: 250px;
     display: table;
+    table-layout: fixed;
 }
 
 .div_result {
