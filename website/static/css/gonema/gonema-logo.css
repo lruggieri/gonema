@@ -1,0 +1,25 @@
+.main-logo {
+    width: 80%;
+    margin: auto;
+    display: block;
+    padding-top: 5%;
+}
+.main-subtitle {
+    margin: auto;
+    display: block;
+    text-align: center;
+    font-family: 'Chalkduster', fantasy !important;
+    font-size: 30px;
+    text-shadow: 1px 1px 1px #000000;
+    color: #ffffff;
+    opacity: 0.3;
+}
+
+@media screen and (max-width: 768px){
+    .main-logo {
+        width: 100%;
+    }
+    .main-subtitle {
+        font-size: 20px;
+    }
+}
