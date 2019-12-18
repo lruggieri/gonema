@@ -228,8 +228,8 @@ $(function() {
                                             '<br /> <a href=\'https://www.qbittorrent.org\' target=\'_blank\'><b>qBittorrent<b/></a>' +
                                             '<br /> <a href=\'https://transmissionbt.com/download\' target=\'_blank\'><b>Transmission<b/></a>' +
                                             '<br /> <a href=\'https://www.utorrent.com\' target=\'_blank\'><b>uTorrent<b/></a>' +
-                                        '</a>"' +
-                                        'data-html="true"></a>',
+                                        '</a> "' +
+                                        ' data-html="true"></a>',
                                         formatFiles(currentTorrent["files"])
                                     ]).draw().node();
 
@@ -320,14 +320,14 @@ $(function() {
                 trigger: 'manual',
             })
             .on('mouseenter', function () {
-                var _this = this;
+                let _this = this;
                 $(this).popover('show');
                 $('.popover').on('mouseleave', function () {
                     $(_this).popover('hide');
                 });
             })
             .on('mouseleave', function () {
-                var _this = this;
+                let _this = this;
                 setTimeout(function () {
                     if (!$('.popover:hover').length) {
                         $(_this).popover('hide');
@@ -340,7 +340,7 @@ $(function() {
             html: true,
             trigger: 'hover',
             content: function () {
-                return "<img class='hover-img' src='" + $(this).data('img') + "'/>";
+                return "<img class='hover-img' src='" + $(this).data('img') + "' alt='hover--poster-img'/>";
             },
             template:getPopoverCustomTemplate("popover-poster")
         })

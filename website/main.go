@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/NYTimes/gziphandler"
 	"github.com/lruggieri/gonema/website/controller"
 	"github.com/lruggieri/utils/netutil"
 	"html/template"
@@ -44,7 +45,6 @@ func (nfs neuteredFileSystem) Open(path string) (http.File, error) {
 	return f, nil
 }
 
-
 func main() {
 	templatesDir = os.Getenv("TEMPLATES_DIR")
 	if len(templatesDir) == 0{
@@ -57,11 +57,11 @@ func main() {
 
 	mux := http.NewServeMux()
 	fs := http.FileServer(neuteredFileSystem{http.Dir(staticAssetDir)})
-	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+	mux.Handle("/static/", http.StripPrefix("/static/", gziphandler.GzipHandler(fs)))
 	mux.HandleFunc("/favicon.ico",faviconHandler)
 	mux.HandleFunc("/robots.txt",robotsHandler)
-	mux.Handle("/central", netutil.HandleWithError(centralControllerHandler))
-	mux.HandleFunc("/", mainPageHandler)
+	mux.Handle("/central", gziphandler.GzipHandler(netutil.HandleWithError(centralControllerHandler)))
+	mux.Handle("/", gziphandler.GzipHandler(http.HandlerFunc(mainPageHandler)))
 
 	var tlsCertPath = os.Getenv("TLS_CERT_PATH")
 	var tlsKeyPath = os.Getenv("TLS_KEY_PATH")
