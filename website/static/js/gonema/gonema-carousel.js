@@ -110,7 +110,7 @@ $(function() {
                             for (let p = 0; p < maxPosterPerSlide-currentSlidePosters; p++){
                                 let col = $('<div class="col-sm"></div>');
                                 let href = $('<a class="poster-link" href="#"</a>');
-                                
+
                                 href.appendTo(col);
                                 col.appendTo(currentRow);
                             }
@@ -130,12 +130,15 @@ $(function() {
                     let invalidPosters = 0;
                     for (let i = 0; i < resp.length; i++){
                         if (resp[i].hasOwnProperty('poster') && resp[i].hasOwnProperty('imdbID') && resp[i].hasOwnProperty('name')){
+
+                            //not displaying missing posters seems better looking
                             if (resp[i].poster === 'N/A'){
                                 invalidPosters++;
                                 continue;
                             }else{
                                 currentSlidePosters++;
                             }
+                            
                             let col = $('<div class="col-sm"></div>');
                             let href = $('<a class="poster-link" href="#"</a>');
                             let poster = $('<img class="d-block w-100 carousel-poster" src="'+resp[i].poster+'" alt="slide '+i+'" ' +
