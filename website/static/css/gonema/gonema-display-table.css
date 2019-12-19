@@ -1,0 +1,11 @@
+@media screen and (max-width: 768px) {
+    #table_torrents td {
+        font-size: 12px;
+    }
+    #table_torrents td.tName{
+        word-break: break-all;
+    }
+    #table_torrents td.tDownload,th.tDownload,td.tSize,th.tSize,td.tPeers,th.tPeers{
+        padding-left: 0;
+    }
+}

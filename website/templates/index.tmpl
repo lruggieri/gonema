@@ -35,6 +35,7 @@
     <link rel="stylesheet" type="text/css" href="../static/css/gonema/gonema-main.css">
     <link rel="stylesheet" type="text/css" href="../static/css/gonema/gonema-carousel.css">
     <link rel="stylesheet" type="text/css" href="../static/css/gonema/gonema-logo.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/gonema/gonema-display-table.css">
     <link rel="stylesheet" type="text/css" href="../static/DataTables/datatables.min.css">
     <link rel="stylesheet" type="text/css" href="../static/DataTables/Responsive-2.2.3/css/responsive.dataTables.min.css">
 </head>
@@ -67,7 +68,7 @@
                 <li class="nav-item">
                     <a class="nav-link" id="torrents-tab" href="#torrents" role="tab" data-toggle="tab" aria-controls="torrents"
                        rel="popover" data-placement="top"
-                       data-content="Every torrent available, unfiltered.">Torrents</a>
+                       data-content="Every torrent available, unfiltered.">All Torrents</a>
                 </li>
             </ul>
 
@@ -220,10 +221,12 @@
         <div id="div_torrents" class="col-md-12" style="display: none">
             <table id="table_torrents" class="table table-hover table-striped dt-responsive" cellspacing="0" width="100%">
                 <thead>
+
+                {{/*if you change the order or add columns, remember to change the .js indices as well!*/}}
                 <tr>
                     <th class="all">Name</th>
                     <th class="all">Size</th>
-                    <th>Peers</th>
+                    <th class="all">Peers</th>
                     <th class="all">Download</th>
                     <th class="none">Files</th>
                 </tr>
