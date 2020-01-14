@@ -41,7 +41,7 @@ $(function() {
             customHide(singleResultDiv);
             displayLoadingSubmit();
 
-            if (inputResourceImdbID.val().length > 0){
+            if (inputResourceImdbID.val().length > 0 && !isMobile){
                 $.ajax({
                     url : "/central",
                     type : 'POST',
@@ -353,6 +353,16 @@ $(function() {
             {
                 "aaSorting": [], //not sorting initially, preserving DB order (the user can choose after)
                 responsive: true,
+                "columnDefs":
+                [
+                    { "width": "40%", "targets": 0 },
+                    { "width": "20%", "targets": [1,2,3] },
+
+                    { className: "tName", "targets": 0 },
+                    { className: "tSize", "targets": 1 },
+                    { className: "tPeers", "targets": 2 },
+                    { className: "tDownload", "targets": 3 }
+                ],
                 drawCallback: function () {
                     initPosterPopover()
                 }

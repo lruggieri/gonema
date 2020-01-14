@@ -1,7 +1,7 @@
 $(function() {
-    let maxSlidePerCarousel = 5;
+    let maxPosterPerSlide = 5;
     if (isMobile) {
-        maxSlidePerCarousel = 1;
+        maxPosterPerSlide = 1;
     }
 
 
@@ -103,25 +103,45 @@ $(function() {
                     let currentCarouselItem = $('<div class="carousel-item"></div>');
                     let currentRow = $('<div class="row"></div>');
                     let indicators = 0;
+                    let currentSlidePosters = 0;
                     let insert = function () {
-                            /*let href = $('<a href="http://estiloasertivo.blogspot.com.es/"> </a>');
-                            href.appendTo(currentCarouselItem);
-                            currentRow.appendTo(href);*/
-                            currentRow.appendTo(currentCarouselItem);
-                            currentCarouselItem.appendTo($(iCarouselDivID+' > .carousel-inner'));
-                            //Indicators
-                            $('<li data-target="'+iCarouselDivID+'" data-slide-to="'+indicators+'"></li>').appendTo($(iCarouselDivID+' > .carousel-indicators'));
-                            indicators++;
+                        //insert blank spaces to avoid weird image resizing
+                        if (currentSlidePosters < maxPosterPerSlide){
+                            for (let p = 0; p < maxPosterPerSlide-currentSlidePosters; p++){
+                                let col = $('<div class="col-sm"></div>');
+                                let href = $('<a class="poster-link" href="#"</a>');
 
-                            //reset
-                            currentCarouselItem = $('<div class="carousel-item"></div>');
-                            currentRow = $('<div class="row"></div>');
+                                href.appendTo(col);
+                                col.appendTo(currentRow);
+                            }
+                        }
+
+                        currentRow.appendTo(currentCarouselItem);
+                        currentCarouselItem.appendTo($(iCarouselDivID + ' > .carousel-inner'));
+                        //Indicators
+                        $('<li data-target="' + iCarouselDivID + '" data-slide-to="' + indicators + '"></li>').appendTo($(iCarouselDivID + ' > .carousel-indicators'));
+                        indicators++;
+
+                        //reset
+                        currentCarouselItem = $('<div class="carousel-item"></div>');
+                        currentRow = $('<div class="row"></div>');
+                        currentSlidePosters = 0;
                     };
+                    let invalidPosters = 0;
                     for (let i = 0; i < resp.length; i++){
                         if (resp[i].hasOwnProperty('poster') && resp[i].hasOwnProperty('imdbID') && resp[i].hasOwnProperty('name')){
+
+                            //not displaying missing posters seems better looking
+                            if (resp[i].poster === 'N/A'){
+                                invalidPosters++;
+                                continue;
+                            }else{
+                                currentSlidePosters++;
+                            }
+                            
                             let col = $('<div class="col-sm"></div>');
                             let href = $('<a class="poster-link" href="#"</a>');
-                            let poster = $('<img class="d-block w-100 carousel-poster" src="'+resp[i].poster+'" alt="'+i+' slide" ' +
+                            let poster = $('<img class="d-block w-100 carousel-poster" src="'+resp[i].poster+'" alt="slide '+i+'" ' +
                                 'data-imdbid="'+resp[i].imdbID+'" data-name="'+resp[i].name+'">');
 
 
@@ -129,7 +149,7 @@ $(function() {
                             href.appendTo(col);
                             col.appendTo(currentRow);
 
-                            if ((i+1) % maxSlidePerCarousel === 0){
+                            if ((i+1-invalidPosters) % maxPosterPerSlide === 0){
                                 insert();
                             }
                         }
