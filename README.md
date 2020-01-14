@@ -17,12 +17,12 @@ huge collection of movies, along with several available Torrent versions and lin
 It will also offer the possibility of subscribing for a specific movie and receiving notifications
 about the availability of a specific Torrent version (quality, source, etc.).
 
-This website will be fully developed in [Golang](https://golang.org/).
+This website is developed in [Golang](https://golang.org/) and Javascript.
 
 
 
 #### REQUIREMENTS
-- Golang 1.11 or grater
+- Golang 1.12 or grater
 - Debian or RedHad based Linux distribution
 
 
@@ -35,7 +35,7 @@ sudo ./scripts/install_dependencies.sh
 ```
 
 #### DOCKER
-Docker for this project is available in Goggle Cloud Container Registry under '[eu.gcr.io/gonema/gonema](eu.gcr.io/gonema/gonema)'
+Docker for this project is available in Goggle Cloud Container Registry under '[eu.gcr.io/gonema/gonema](eu.gcr.io/gonema/gonemaweb)'
 To run the website:
 ```
 docker-compose up -d --build gonemaweb
@@ -48,14 +48,14 @@ you should delete this variable from the compose.override file, so that the main
 will take place.
 
 
-#### TODO LIST (working on bolded)
+#### TODO LIST
 - [X] Finalize a first version of the API, capable of returning basic information
 about the searched movie
 - [X] Build Docker image
 - [X] Deploy on cloud
 - [X] Build a minimal website version in order to use the API
 - [X] Create a local DB using ElasticSearch
-- [ ] Improve the API. Add Movie information from Imdb, possibly using their API
+- [X] Improve the API. Add Movie information from Imdb, possibly using their API
 - [ ] Implement CI (+ Docker integration)
 - [ ] Improve website with more complex JS and CSS
 - [ ] Integrate with Slack interactive commands
