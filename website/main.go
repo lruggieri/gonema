@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/NYTimes/gziphandler"
+	"github.com/lruggieri/gonema/pkg/utils"
 	"github.com/lruggieri/gonema/website/controller"
 	"github.com/lruggieri/utils/netutil"
 	"html/template"
@@ -10,11 +11,17 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 )
 
 var(
 	templatesDir string
 	staticAssetDir string
+
+	cache *utils.Cache
+)
+const(
+	cacheRootAggregation = utils.CacheElementRoot("aggregations")
 )
 
 // neuteredFileSystem is used to prevent directory listing of static assets
@@ -62,6 +69,9 @@ func main() {
 	mux.HandleFunc("/robots.txt",robotsHandler)
 	mux.Handle("/central", gziphandler.GzipHandler(netutil.HandleWithError(centralControllerHandler)))
 	mux.Handle("/", gziphandler.GzipHandler(http.HandlerFunc(mainPageHandler)))
+
+	cache = utils.NewCache()
+	cache.SetNewRootElementDuration(cacheRootAggregation,10*time.Minute)
 
 	var tlsCertPath = os.Getenv("TLS_CERT_PATH")
 	var tlsKeyPath = os.Getenv("TLS_KEY_PATH")
@@ -135,54 +145,6 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.Re
 		case "suggest":{
 			resourceName := r.FormValue("resourceName")
 			if len(resourceName) > 0{
-
-				/*requestUrl := bytes.Buffer{}
-				requestUrl.WriteString(os.Getenv("GONEMAES_API_HOST"))
-				port := os.Getenv("GONEMAES_API_PORT")
-				if len(port) > 0 {
-					requestUrl.WriteString(":")
-					requestUrl.WriteString(port)
-				}
-				requestUrl.WriteString("/complete?field=name&text=")
-				requestUrl.WriteString(resourceName)
-				requestUrl.WriteString("&size=10")
-				resp, err := http.Get(requestUrl.String())
-				if err != nil{
-					return netutil.ResponseLayout{
-						StatusCode:http.StatusInternalServerError,
-						Error:"cannot get es_api. err: "+err.Error(),
-						IsInternalError:true,
-					}
-				}
-				defer resp.Body.Close()
-
-				respBytes, err := ioutil.ReadAll(resp.Body)
-				if err != nil{
-					return netutil.ResponseLayout{
-						StatusCode:http.StatusInternalServerError,
-						Error:"cannot read es_api response. err: "+err.Error(),
-						IsInternalError:true,
-					}
-				}
-				var respDecoded netutil.ResponseLayout
-				err = json.Unmarshal(respBytes,&respDecoded)
-				if err != nil{
-					return netutil.ResponseLayout{
-						StatusCode:http.StatusInternalServerError,
-						Error:"cannot decode es_api response. err: "+err.Error(),
-						IsInternalError:true,
-					}
-				}
-				if len(respDecoded.Error) > 0{
-					return netutil.ResponseLayout{
-						StatusCode:http.StatusInternalServerError,
-						Error:respDecoded.Error,
-					}
-				}
-				return netutil.ResponseLayout{
-					StatusCode:http.StatusOK,
-					Response:respDecoded.Response,
-				}*/
 				resources, err := controller.GetResourceInfoFromOmdb(resourceName, "")
 				if err != nil{
 					return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
@@ -197,19 +159,28 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.Re
 			}
 		}
 		case "getAggregations":{
-			aggType := r.FormValue("aggType")
-			resType := r.FormValue("resType")
-			if len(aggType) == 0{
-				return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid aggType when getting aggregations"}
+
+			aggregationKey := utils.CacheElementKey(r.Form.Encode())
+
+			cachedValue := cache.Fetch(cacheRootAggregation,aggregationKey)
+			if cachedValue != nil{
+				return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:cachedValue}
+			}else{
+				aggType := r.FormValue("aggType")
+				resType := r.FormValue("resType")
+				if len(aggType) == 0{
+					return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid aggType when getting aggregations"}
+				}
+				if len(resType) == 0{
+					return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid resType when getting aggregations"}
+				}
+				torrents,err := controller.GetAggregations(aggType,resType)
+				if err != nil{
+					return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
+				}
+				cache.Insert(cacheRootAggregation, aggregationKey, torrents)
+				return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:torrents}
 			}
-			if len(resType) == 0{
-				return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid resType when getting aggregations"}
-			}
-			torrents,err := controller.GetAggregations(aggType,resType)
-			if err != nil{
-				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
-			}
-			return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:torrents}
 		}
 		default:
 			return netutil.ResponseLayout{

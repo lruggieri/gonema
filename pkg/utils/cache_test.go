@@ -52,7 +52,7 @@ func TestCache_InsertAndFetch (t *testing.T){
 }
 
 func TestCacheElement_Deadline(t *testing.T) {
-
+	cacheRefreshTime = 10*time.Minute //so it doesn't get triggered during the test
 	c := NewCache()
 	cacheRefreshTime = 10*time.Millisecond
 
