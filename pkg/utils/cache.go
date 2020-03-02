@@ -6,18 +6,17 @@ import (
 )
 
 
-/*
-General purpose caching system, with support for custom "root" duration.
-
-A cache key is basically a string composed by a "root" and a "key".
-The root part is used to customize how different
-cache elements have to behave.
-*/
-
-
 type (
-	//map key ==> cacheElement
-	cache struct{
+	/*
+	General purpose thread-safe caching system, with support for custom "root" duration.
+
+	A cache KEY is basically a string composed by a "root" and a "key".
+	The root part is used to customize how different cache elements have to behave.
+	The key part is the actual element key, but belongs to a root.
+	Different roots can have the same key.
+	Having several roots is useful in order to set different durations to a different set of keys.
+	*/
+	Cache struct{
 		elements map[string]cacheElement
 		lock sync.RWMutex
 
@@ -28,10 +27,6 @@ type (
 		value    interface{}
 	}
 
-	/*
-	I may want to differentiate between keys as imdbID or keys as direct name, so examples of
-	root may be 'resourceImdbID' or 'resourceName'
-	*/
 	CacheElementRoot string
 	CacheElementKey string
 )
@@ -44,21 +39,23 @@ var(
 	cacheRefreshTime = 1 * time.Second
 )
 
-func NewCache() *cache{
-	return &cache{
+func NewCache() *Cache {
+	c := &Cache{
 		elements:make(map[string]cacheElement,1000),
 		cacheRootElementsDuration:make(map[CacheElementRoot]time.Duration),
 	}
+	go c.startLocalExpirationFetch()
+	return c
 }
 
-func (c *cache) SetNewRootElementDuration(iRoot CacheElementRoot, iDuration time.Duration){
+func (c *Cache) SetNewRootElementDuration(iRoot CacheElementRoot, iDuration time.Duration){
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
 	c.cacheRootElementsDuration[iRoot] = iDuration
 }
 //loops through localCache elements and remove expired one
-func (c *cache) StartLocalExpirationFetch(){
+func (c *Cache) startLocalExpirationFetch(){
 	if localCacheExpirationCheckStarted {
 		Logger.Warn("local cache expiration check already started")
 	}
@@ -104,7 +101,7 @@ func (ce *cacheElement) Value() interface{}{
 /*
 I may want to differentiate between keys as imdbID or keys as direct name
 */
-func (c *cache) Insert(iCacheRoot CacheElementRoot,iCacheKey CacheElementKey, iValue interface{}){
+func (c *Cache) Insert(iCacheRoot CacheElementRoot,iCacheKey CacheElementKey, iValue interface{}){
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -118,7 +115,7 @@ func (c *cache) Insert(iCacheRoot CacheElementRoot,iCacheKey CacheElementKey, iV
 		value:iValue,
 	}
 }
-func (c *cache) Fetch(iCacheRoot CacheElementRoot,iCacheKey CacheElementKey) (oValue interface{}){
+func (c *Cache) Fetch(iCacheRoot CacheElementRoot,iCacheKey CacheElementKey) (oValue interface{}){
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
@@ -128,7 +125,7 @@ func (c *cache) Fetch(iCacheRoot CacheElementRoot,iCacheKey CacheElementKey) (oV
 	}
 	return cachedElement.value
 }
-func (c *cache) Reset(){
+func (c *Cache) Reset(){
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	c = NewCache()
