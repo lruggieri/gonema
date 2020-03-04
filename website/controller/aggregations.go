@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+//GetAggregations calls Elasticsearch to get data aggregations (eg. most shared movies/series)
+//It returns either nil or a ResponseLayout.Response object
 func GetAggregations(iAggType, iresType string) (interface{}, error) {
 	gonemapiHost := os.Getenv("GONEMAES_API_HOST")
 	gonemapiPort := os.Getenv("GONEMAES_API_PORT")

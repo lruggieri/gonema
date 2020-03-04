@@ -11,6 +11,13 @@ import (
 	"time"
 )
 
+/*
+GetResourceInfoFromOmdb Calls Omdb API and returns the response.
+The return type might be a single object or an array of objects, depending on Omdb API.
+
+A call for an ID will return a single object, while a call with a search parameter will return a slice
+of objects.
+*/
 func GetResourceInfoFromOmdb(resourceName, resourceImdbID string) (interface{}, error) {
 	endPoint := "http://www.omdbapi.com"
 	mountPoint := "/"
@@ -90,22 +97,26 @@ func GetResourceInfoFromOmdb(resourceName, resourceImdbID string) (interface{}, 
 	}
 }
 
+//OmbdResponse is the common part of every Omdb API response
 type OmbdResponse struct{
 	Response string `json:"Response"`
 	Error string `json:"Error,omitempty"`
 }
+//IsValid returns whether a given response is valid or not
 func(or *OmbdResponse) IsValid() bool{
 	if or.Response == "True"{
 		return true
 	}
 	return false
 }
+//IsMovieNotFound returns if the response error refers to a movie being not found
 func (or *OmbdResponse) IsMovieNotFound() bool{
 	if strings.ToLower(or.Error) == "movie not found!" {
 		return true
 	}
 	return false
 }
+//OmdbResponseByID is the full representation of an Ombd response when querying by ID
 type OmdbResponseByID struct{
 	*OmbdResponse
 	Title string `json:"Title"`
@@ -136,6 +147,7 @@ type OmdbResponseByID struct{
 	Production string `json:"Production"`
 	Website string `json:"Website"`
 }
+//OmdbResponseBySearch is the full representation of an Ombd response when querying by search
 type OmdbResponseBySearch struct{
 	*OmbdResponse
 	Search []struct{

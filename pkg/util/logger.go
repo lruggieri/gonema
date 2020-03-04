@@ -1,16 +1,11 @@
-package utils
+package util
 
 import (
 	"github.com/sirupsen/logrus"
 	"os"
 )
 
-/*
-Checked in front of every DEBUG level logging, because the require A TON OF MEMORY due to the fact that they accept
-a variadic of interfaces, which have to be translated in their basic types.
-*/
-var DebugActive bool
-
+//Logger is the main log variable. Will be called for every logging purposes.
 var Logger = logrus.New()
 
 func init(){

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/NYTimes/gziphandler"
-	"github.com/lruggieri/gonema/pkg/utils"
+	uCache "github.com/lruggieri/gonema/pkg/util/cache"
 	"github.com/lruggieri/gonema/website/controller"
 	"github.com/lruggieri/utils/netutil"
 	"html/template"
@@ -18,13 +18,13 @@ var(
 	templatesDir string
 	staticAssetDir string
 
-	cache *utils.Cache
+	cache *uCache.Cache
 )
 const(
-	cacheRootAggregation = utils.CacheElementRoot("aggregations")
+	cacheRootAggregation = uCache.CacheElementRoot("aggregations")
 )
 
-// neuteredFileSystem is used to prevent directory listing of static assets
+//neuteredFileSystem is used to prevent directory listing of static assets
 type neuteredFileSystem struct {
 	fs http.FileSystem
 }
@@ -70,7 +70,7 @@ func main() {
 	mux.Handle("/central", gziphandler.GzipHandler(netutil.HandleWithError(centralControllerHandler)))
 	mux.Handle("/", gziphandler.GzipHandler(http.HandlerFunc(mainPageHandler)))
 
-	cache = utils.NewCache()
+	cache = uCache.NewCache()
 	cache.SetNewRootElementDuration(cacheRootAggregation,10*time.Minute)
 
 	var tlsCertPath = os.Getenv("TLS_CERT_PATH")
@@ -160,7 +160,7 @@ func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.Re
 		}
 		case "getAggregations":{
 
-			aggregationKey := utils.CacheElementKey(r.Form.Encode())
+			aggregationKey := uCache.CacheElementKey(r.Form.Encode())
 
 			cachedValue := cache.Fetch(cacheRootAggregation,aggregationKey)
 			if cachedValue != nil{

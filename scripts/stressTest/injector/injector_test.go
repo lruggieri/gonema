@@ -2,7 +2,7 @@ package injector
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/lruggieri/gonema/pkg/utils"
+	"github.com/lruggieri/gonema/pkg/util"
 	"testing"
 )
 
@@ -12,7 +12,7 @@ func TestInjector_Run(t *testing.T) {
 	},100)
 
 
-	utils.DebugActive = false
-	utils.Logger.Level = logrus.DebugLevel
+	util.DebugActive = false
+	util.Logger.Level = logrus.DebugLevel
 	inj.Run()
 }

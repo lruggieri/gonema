@@ -10,6 +10,9 @@ import (
 	"time"
 )
 
+//GetTorrents calls Elasticsearch to get info about torrents for a specific search.
+//This search can be performed either providing a keyword or providing a specific resource ImdbID.
+//The input type ('movies', 'series', etc.) will be use by ES as filter on results.
 func GetTorrents(iKeyword, iImdbID, iType string) (interface{}, error) {
 	gonemapiHost := os.Getenv("GONEMAES_API_HOST")
 	gonemapiPort := os.Getenv("GONEMAES_API_PORT")
