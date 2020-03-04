@@ -1,6 +1,8 @@
-package utils
+package cache
 
 import (
+	"fmt"
+	"github.com/lruggieri/gonema/pkg/util"
 	"strconv"
 	"testing"
 	"time"
@@ -24,7 +26,7 @@ func TestCache_InsertAndFetch (t *testing.T){
 	elementToInsert := 100000
 	insertedElements := make([]interface{},0,elementToInsert)
 	for i := 0 ; i < elementToInsert ; i++{
-		elementToInsert := baseElementsToInsert[GetRandomPositiveInt(len(baseElementsToInsert))]
+		elementToInsert := baseElementsToInsert[util.GetRandomPositiveInt(len(baseElementsToInsert))]
 		c.Insert(CacheElementRoot(strconv.Itoa(i)),"key",elementToInsert)
 		insertedElements = append(insertedElements,elementToInsert)
 	}
@@ -125,4 +127,42 @@ func TestCacheElement_Deadline(t *testing.T) {
 
 
 
+}
+
+func ExampleCache_Insert() {
+	c := NewCache()
+	c.Insert("root1","key1","value1")
+	fmt.Println(c.Fetch("root1","key1"))
+	// Output: value1
+}
+func ExampleCache_Fetch() {
+	c := NewCache()
+
+	c.Insert("root1","key1","value1")
+	c.Insert("root1","key2","value2")
+	c.Insert("root2","key1","value3")
+
+	fmt.Println(c.Fetch("root1","key1"))
+	fmt.Println(c.Fetch("root1","key2"))
+	fmt.Println(c.Fetch("root2","key1"))
+	// Output:
+	// value1
+	// value2
+	// value3
+
+}
+func ExampleCache_Reset() {
+	c := NewCache()
+	c.Insert("root1","key1","value1")
+	c.Reset()
+	fmt.Println(c.Fetch("root1","key1"))
+	// Output: <nil>
+}
+func ExampleCache_SetNewRootElementDuration() {
+	c := NewCache()
+	c.SetNewRootElementDuration("root1",time.Second)
+
+	fmt.Println(c.cacheRootElementsDuration["root1"])
+
+	// Output: 1s
 }

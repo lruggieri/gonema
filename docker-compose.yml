@@ -14,5 +14,4 @@ services:
       STATIC_ASSET_DIR: website/static
       GONEMAES_API_HOST: https://gonemaes_api.ruggieri.tech
       GONEMAES_API_PORT: 8080
-      #OMDB_APIKEY:
     restart: always

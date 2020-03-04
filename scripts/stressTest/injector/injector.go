@@ -2,7 +2,7 @@ package injector
 
 import (
 	"errors"
-	"github.com/lruggieri/gonema/pkg/utils"
+	"github.com/lruggieri/gonema/pkg/util"
 	"io"
 	"io/ioutil"
 	"net"
@@ -25,11 +25,11 @@ type injector struct{
 }
 func (i *injector) Run(){
 	if i.started{
-		utils.Logger.Error("injector is already running")
+		util.Logger.Error("injector is already running")
 	}
 	i.started = true
 
-	utils.Logger.Info("Injector started for mainHost ",i.mainHost)
+	util.Logger.Info("Injector started for mainHost ",i.mainHost)
 
 
 	for _,parameterToShoot := range i.parametersToShoot{
@@ -56,11 +56,11 @@ func (i *injector) runConfiguration(mainHost, parameters string) error{
 			},
 		})
 	}
-	if utils.DebugActive{utils.Logger.Debug("connection pool created with ",connectionsPoolElements, " elements")}
+	util.Logger.Debug("connection pool created with ",connectionsPoolElements, " elements")
 
 
 
-	if utils.DebugActive{utils.Logger.Debug("performing first request...")}
+	util.Logger.Debug("performing first request...")
 	request,_ := http.NewRequest(http.MethodGet,urlToCall,nil)
 	//the first request (to fill the cache) should have a higher timeout
 	firstClient := http.Client{
@@ -74,16 +74,16 @@ func (i *injector) runConfiguration(mainHost, parameters string) error{
 		return errors.New("problem during first request for '"+parameters+"': "+firstResult.err.Error())
 	}
 
-	utils.Logger.Info("First request performed. Starting to shoot at "+strconv.Itoa(i.tps)+" tps")
+	util.Logger.Info("First request performed. Starting to shoot at "+strconv.Itoa(i.tps)+" tps")
 
 	rate := time.Second / time.Duration(i.tps)
 	throttle := time.Tick(rate)
 	for{
-		randomClient := clientsPool[utils.GetRandomPositiveInt(len(clientsPool))]
+		randomClient := clientsPool[util.GetRandomPositiveInt(len(clientsPool))]
 		<- throttle
 		go func(iClient http.Client){
 			res := makeRequest(&randomClient,request)
-			if utils.DebugActive{utils.Logger.Debug(res.statusCode)}
+			util.Logger.Debug(res.statusCode)
 		}(randomClient)
 	}
 }
@@ -91,7 +91,7 @@ func (i *injector) runConfiguration(mainHost, parameters string) error{
 func (i *injector) logStats(){}
 
 func makeRequest(iClient *http.Client,iReq *http.Request) (oResult singleInjectionResult){
-	if utils.DebugActive{utils.Logger.Debug("shooting request for ",iReq.URL)}
+	util.Logger.Debug("shooting request for ",iReq.URL)
 	resp,err := iClient.Do(iReq)
 	if err != nil{
 		return singleInjectionResult{

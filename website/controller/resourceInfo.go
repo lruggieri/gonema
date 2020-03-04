@@ -10,6 +10,9 @@ import (
 	"time"
 )
 
+//GetResourceInfo calls Elasticsearch to get info about a specific resors, either
+//by its ImdbID or its name
+//It returns either nil or a ResponseLayout.Response object
 func GetResourceInfo(resourceName, resourceImdbID string) (interface{}, error) {
 	gonemapiHost := os.Getenv("GONEMAES_API_HOST")
 	gonemapiPort := os.Getenv("GONEMAES_API_PORT")
