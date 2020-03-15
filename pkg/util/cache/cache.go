@@ -1,23 +1,24 @@
+/*
+Package Cache provides a general purpose thread-safe caching system, with support for custom "root" duration.
+
+A cache KEY is basically a string composed by a "root" and a "key".
+The root part is used to customize how different cache elements have to behave.
+The key part is the actual element key, but belongs to a root.
+Different roots can have the same key.
+Having several roots is useful in order to set different durations to a different set of keys.
+In the end, the actual cache hashmap will have 'root_key' as entry.
+*/
 package cache
 
 import (
-	"github.com/lruggieri/gonema/pkg/util"
+	"fmt"
 	"sync"
 	"time"
 )
 
 
 type (
-	/*
-	Cache is a general purpose thread-safe caching system, with support for custom "root" duration.
-
-	A cache KEY is basically a string composed by a "root" and a "key".
-	The root part is used to customize how different cache elements have to behave.
-	The key part is the actual element key, but belongs to a root.
-	Different roots can have the same key.
-	Having several roots is useful in order to set different durations to a different set of keys.
-	In the end, the actual cache hashmap will have 'root_key' as entry.
-	*/
+	//Cache is the main cache struct
 	Cache struct{
 		sync.RWMutex
 		
@@ -64,7 +65,8 @@ func (c *Cache) SetNewRootElementDuration(iRoot CacheElementRoot, iDuration time
 //loops through localCache elements and remove expired one
 func (c *Cache) startLocalExpirationFetch(){
 	if localCacheExpirationCheckStarted {
-		util.Logger.Warn("local cache expiration check already started")
+		fmt.Println("local cache expiration check already started")
+		return
 	}
 
 

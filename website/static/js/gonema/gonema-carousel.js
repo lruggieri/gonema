@@ -138,7 +138,7 @@ $(function() {
                             }else{
                                 currentSlidePosters++;
                             }
-                            
+
                             let col = $('<div class="col-sm"></div>');
                             let href = $('<a class="poster-link" href="#"</a>');
                             let poster = $('<img class="d-block w-100 carousel-poster" src="'+resp[i].poster+'" alt="slide '+i+'" ' +
