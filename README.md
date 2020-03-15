@@ -1,5 +1,9 @@
 [Website](https://gonemaweb.ruggieri.tech/)
 
+#### DESIGN
+![Design](design.png)
+
+
 #### REASON
 I like movies!
 I like to watch some movie even twice ot 3 times, and I am not always
@@ -35,7 +39,7 @@ sudo ./scripts/install_dependencies.sh
 ```
 
 #### DOCKER
-Docker for this project is available in Goggle Cloud Container Registry under '[eu.gcr.io/gonema/gonema](eu.gcr.io/gonema/gonemaweb)'
+Docker for this project is available in Google Cloud Container Registry under '[eu.gcr.io/gonema/gonema](eu.gcr.io/gonema/gonemaweb)'
 To run the website:
 ```
 docker-compose up -d --build gonemaweb

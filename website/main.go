@@ -96,7 +96,6 @@ func main() {
 
 func mainPageHandler(w http.ResponseWriter, r *http.Request){
 	mainPage := filepath.Join(templatesDir,"index.tmpl")
-
 	tmpl := template.Must(template.ParseFiles(mainPage))
 
 	err := tmpl.Execute(w,nil)
