@@ -200,12 +200,9 @@ $(function() {
                     * otherwise we can use 'div_single_result'
                     * */
 
-
                     resetTorrentDataTable();
-
                     if (torrents instanceof Array){
                         if (torrents.length > 0){
-
                             //now fetch and populate torrent table
                             for(let i=0 ; i<torrents.length ; i++){
                                 let currentTorrent = torrents[i];
@@ -231,7 +228,7 @@ $(function() {
                                         '</a> "' +
                                         ' data-html="true"></a>',
                                         formatFiles(currentTorrent["files"])
-                                    ]).draw().node();
+                                    ]);
 
                                     //no poster on mobile, if's annoying
                                     if (!isMobile){
@@ -249,6 +246,9 @@ $(function() {
                                     console.log("currentTorrent is missing some property",currentTorrent);
                                 }
                             }
+                            //finally, draw the main torrents table
+                            $torrents_table.draw();
+
                             initPopovers();
 
                             customShow(torrentsDiv);
@@ -272,7 +272,6 @@ $(function() {
 
                     notifyError("some error occurred")
                 }
-
             },
             error: dealWithAjaxError,
         });
