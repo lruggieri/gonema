@@ -21,7 +21,7 @@ ENV GOROOT='/usr/local/go'
 ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 
-COPY pkg/utils pkg/utils
+COPY pkg/util pkg/util
 COPY go.mod go.sum ./
 RUN go mod download
 RUN go mod vendor
