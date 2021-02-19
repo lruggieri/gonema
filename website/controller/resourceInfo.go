@@ -19,44 +19,44 @@ func GetResourceInfo(resourceName, resourceImdbID string) (interface{}, error) {
 	mountPoint := "/resourceInfo"
 
 	requestHostPort := gonemapiHost
-	if len(gonemapiPort) > 0{
+	if len(gonemapiPort) > 0 {
 		requestHostPort += ":" + gonemapiPort
 	}
 	requestHostPort += mountPoint
 
 	client := http.Client{
-		Timeout:60*3*time.Second,
+		Timeout: 60 * 3 * time.Second,
 	}
-	req, err := http.NewRequest("GET",requestHostPort,nil)
-	if err != nil{
+	req, err := http.NewRequest("GET", requestHostPort, nil)
+	if err != nil {
 		return nil, err
 	}
 
 	reqQuery := req.URL.Query()
-	reqQuery.Add("resourceName",resourceName)
-	reqQuery.Add("imdbId",resourceImdbID)
+	reqQuery.Add("resourceName", resourceName)
+	reqQuery.Add("imdbId", resourceImdbID)
 
 	req.URL.RawQuery = reqQuery.Encode()
 	//req.Header.Set(...,...)
 
 	resp, err := client.Do(req)
-	if err != nil{
-		return nil,err
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
-	if resp.StatusCode != http.StatusOK{
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New(string(body))
 	}
 
 	var decodedResp netutil.ResponseLayout
-	err = json.Unmarshal(body,&decodedResp)
-	if err != nil{
-		return nil,err
+	err = json.Unmarshal(body, &decodedResp)
+	if err != nil {
+		return nil, err
 	}
 
 	return decodedResp.Response, nil

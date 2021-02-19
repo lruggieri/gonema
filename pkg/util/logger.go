@@ -8,7 +8,7 @@ import (
 //Logger is the main log variable. Will be called for every logging purposes.
 var Logger = logrus.New()
 
-func init(){
+func init() {
 	Logger.Formatter = new(logrus.JSONFormatter)
 	Logger.Formatter = new(logrus.TextFormatter)
 	Logger.Level = logrus.InfoLevel

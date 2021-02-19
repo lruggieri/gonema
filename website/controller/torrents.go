@@ -19,16 +19,16 @@ func GetTorrents(iKeyword, iImdbID, iType string) (interface{}, error) {
 	mountPoint := "/torrents"
 
 	requestHostPort := gonemapiHost
-	if len(gonemapiPort) > 0{
+	if len(gonemapiPort) > 0 {
 		requestHostPort += ":" + gonemapiPort
 	}
 	requestHostPort += mountPoint
 
 	client := http.Client{
-		Timeout:10*time.Second,
+		Timeout: 10 * time.Second,
 	}
-	req, err := http.NewRequest("GET",requestHostPort,nil)
-	if err != nil{
+	req, err := http.NewRequest("GET", requestHostPort, nil)
+	if err != nil {
 		return nil, err
 	}
 
@@ -41,23 +41,23 @@ func GetTorrents(iKeyword, iImdbID, iType string) (interface{}, error) {
 	//req.Header.Set(...,...)
 
 	resp, err := client.Do(req)
-	if err != nil{
-		return nil,err
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
-	if resp.StatusCode != http.StatusOK{
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New(string(body))
 	}
 
 	var decodedResp netutil.ResponseLayout
-	err = json.Unmarshal(body,&decodedResp)
-	if err != nil{
-		return nil,err
+	err = json.Unmarshal(body, &decodedResp)
+	if err != nil {
+		return nil, err
 	}
 
 	return decodedResp.Response, nil

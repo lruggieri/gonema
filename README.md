@@ -1,5 +1,3 @@
-[Website](https://gonemaweb.ruggieri.tech/)
-
 #### DESIGN
 ![Design](design.png)
 

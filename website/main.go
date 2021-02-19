@@ -14,13 +14,14 @@ import (
 	"time"
 )
 
-var(
-	templatesDir string
+var (
+	templatesDir   string
 	staticAssetDir string
 
 	cache *uCache.Cache
 )
-const(
+
+const (
 	cacheRootAggregation = uCache.CacheElementRoot("aggregations")
 )
 
@@ -54,143 +55,147 @@ func (nfs neuteredFileSystem) Open(path string) (http.File, error) {
 
 func main() {
 	templatesDir = os.Getenv("TEMPLATES_DIR")
-	if len(templatesDir) == 0{
+	if len(templatesDir) == 0 {
 		templatesDir = "website/templates"
 	}
 	staticAssetDir = os.Getenv("STATIC_ASSET_DIR")
-	if len(staticAssetDir) == 0{
+	if len(staticAssetDir) == 0 {
 		staticAssetDir = "website/static"
 	}
 
 	mux := http.NewServeMux()
 	fs := http.FileServer(neuteredFileSystem{http.Dir(staticAssetDir)})
 	mux.Handle("/static/", http.StripPrefix("/static/", gziphandler.GzipHandler(fs)))
-	mux.HandleFunc("/favicon.ico",faviconHandler)
-	mux.HandleFunc("/robots.txt",robotsHandler)
+	mux.HandleFunc("/favicon.ico", faviconHandler)
+	mux.HandleFunc("/robots.txt", robotsHandler)
 	mux.Handle("/central", gziphandler.GzipHandler(netutil.HandleWithError(centralControllerHandler)))
 	mux.Handle("/", gziphandler.GzipHandler(http.HandlerFunc(mainPageHandler)))
 
 	cache = uCache.NewCache()
-	cache.SetNewRootElementDuration(cacheRootAggregation,10*time.Minute)
+	cache.SetNewRootElementDuration(cacheRootAggregation, 10*time.Minute)
 
 	var tlsCertPath = os.Getenv("TLS_CERT_PATH")
 	var tlsKeyPath = os.Getenv("TLS_KEY_PATH")
 
-	if len(tlsCertPath) > 0 && len(tlsKeyPath) > 0{
+	if len(tlsCertPath) > 0 && len(tlsKeyPath) > 0 {
 		err := http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, nil)
-		if err != nil{
+		if err != nil {
 			panic(err)
 		}
-	}else{
+	} else {
 		port := os.Getenv("PORT")
-		if len(port) == 0{
+		if len(port) == 0 {
 			port = "8080"
 		}
-		fmt.Println("web service starting on port "+port)
-		err := http.ListenAndServe(fmt.Sprintf(":%s",port),mux)
-		if err != nil{
+		fmt.Println("web service starting on port " + port)
+		err := http.ListenAndServe(fmt.Sprintf(":%s", port), mux)
+		if err != nil {
 			panic(err)
 		}
 	}
 }
 
-func mainPageHandler(w http.ResponseWriter, r *http.Request){
-	mainPage := filepath.Join(templatesDir,"index.tmpl")
+func mainPageHandler(w http.ResponseWriter, r *http.Request) {
+	mainPage := filepath.Join(templatesDir, "index.tmpl")
 	tmpl := template.Must(template.ParseFiles(mainPage))
 
-	err := tmpl.Execute(w,nil)
-	if err != nil{
+	err := tmpl.Execute(w, nil)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Website down, we are very sorry for the inconvenience."))
 	}
 }
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w,r,path.Join(staticAssetDir,"images","favicon.ico"))
+	http.ServeFile(w, r, path.Join(staticAssetDir, "images", "favicon.ico"))
 }
 func robotsHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w,r,path.Join("robots.txt"))
+	http.ServeFile(w, r, path.Join("robots.txt"))
 }
 func centralControllerHandler(w http.ResponseWriter, r *http.Request) netutil.ResponseLayout {
 
-	if r.Method == http.MethodPost{
+	if r.Method == http.MethodPost {
 		action := r.FormValue("action")
 
 		switch action {
-		case "getResourceInfo":{
-			resourceName := r.FormValue("resourceName")
-			resourceImdbID := r.FormValue("resourceImdbID")
-			if len(resourceName) == 0 && len(resourceImdbID) == 0{
-				return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"no resource name or ID was given"}
-			}
-			resources, err := controller.GetResourceInfoFromOmdb(resourceName, resourceImdbID)
-			if err != nil{
-				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
-			}
-			return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:resources}
-		}
-		case "getTorrents":{
-			keyword := r.FormValue("keyword")
-			imdbID := r.FormValue("imdbID")
-			tType := r.FormValue("type")
-			if len(keyword) == 0{
-				return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid keyword when fetching torrents"}
-			}
-			torrents,err := controller.GetTorrents(keyword,imdbID,tType)
-			if err != nil{
-				return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
-			}
-			return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:torrents}
-		}
-		case "suggest":{
-			resourceName := r.FormValue("resourceName")
-			if len(resourceName) > 0{
-				resources, err := controller.GetResourceInfoFromOmdb(resourceName, "")
-				if err != nil{
-					return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
+		case "getResourceInfo":
+			{
+				resourceName := r.FormValue("resourceName")
+				resourceImdbID := r.FormValue("resourceImdbID")
+				if len(resourceName) == 0 && len(resourceImdbID) == 0 {
+					return netutil.ResponseLayout{StatusCode: http.StatusBadRequest, Error: "no resource name or ID was given"}
 				}
-				return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:resources}
+				resources, err := controller.GetResourceInfoFromOmdb(resourceName, resourceImdbID)
+				if err != nil {
+					return netutil.ResponseLayout{StatusCode: http.StatusInternalServerError, Error: err.Error(), IsInternalError: true}
+				}
+				return netutil.ResponseLayout{StatusCode: http.StatusOK, Response: resources}
+			}
+		case "getTorrents":
+			{
+				keyword := r.FormValue("keyword")
+				imdbID := r.FormValue("imdbID")
+				tType := r.FormValue("type")
+				if len(keyword) == 0 {
+					return netutil.ResponseLayout{StatusCode: http.StatusBadRequest, Error: "invalid keyword when fetching torrents"}
+				}
+				torrents, err := controller.GetTorrents(keyword, imdbID, tType)
+				if err != nil {
+					return netutil.ResponseLayout{StatusCode: http.StatusInternalServerError, Error: err.Error(), IsInternalError: true}
+				}
+				return netutil.ResponseLayout{StatusCode: http.StatusOK, Response: torrents}
+			}
+		case "suggest":
+			{
+				resourceName := r.FormValue("resourceName")
+				if len(resourceName) > 0 {
+					resources, err := controller.GetResourceInfoFromOmdb(resourceName, "")
+					if err != nil {
+						return netutil.ResponseLayout{StatusCode: http.StatusInternalServerError, Error: err.Error(), IsInternalError: true}
+					}
+					return netutil.ResponseLayout{StatusCode: http.StatusOK, Response: resources}
 
-			}else{
-				return netutil.ResponseLayout{
-					StatusCode:http.StatusBadRequest,
-					Error:"invalid parameters",
+				} else {
+					return netutil.ResponseLayout{
+						StatusCode: http.StatusBadRequest,
+						Error:      "invalid parameters",
+					}
 				}
 			}
-		}
-		case "getAggregations":{
+		case "getAggregations":
+			{
 
-			aggregationKey := uCache.CacheElementKey(r.Form.Encode())
+				aggregationKey := uCache.CacheElementKey(r.Form.Encode())
 
-			cachedValue := cache.Fetch(cacheRootAggregation,aggregationKey)
-			if cachedValue != nil{
-				return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:cachedValue}
-			}else{
-				aggType := r.FormValue("aggType")
-				resType := r.FormValue("resType")
-				if len(aggType) == 0{
-					return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid aggType when getting aggregations"}
+				cachedValue := cache.Fetch(cacheRootAggregation, aggregationKey)
+				if cachedValue != nil {
+					return netutil.ResponseLayout{StatusCode: http.StatusOK, Response: cachedValue}
+				} else {
+					aggType := r.FormValue("aggType")
+					resType := r.FormValue("resType")
+					if len(aggType) == 0 {
+						return netutil.ResponseLayout{StatusCode: http.StatusBadRequest, Error: "invalid aggType when getting aggregations"}
+					}
+					if len(resType) == 0 {
+						return netutil.ResponseLayout{StatusCode: http.StatusBadRequest, Error: "invalid resType when getting aggregations"}
+					}
+					torrents, err := controller.GetAggregations(aggType, resType)
+					if err != nil {
+						return netutil.ResponseLayout{StatusCode: http.StatusInternalServerError, Error: err.Error(), IsInternalError: true}
+					}
+					cache.Insert(cacheRootAggregation, aggregationKey, torrents)
+					return netutil.ResponseLayout{StatusCode: http.StatusOK, Response: torrents}
 				}
-				if len(resType) == 0{
-					return netutil.ResponseLayout{StatusCode:http.StatusBadRequest,Error:"invalid resType when getting aggregations"}
-				}
-				torrents,err := controller.GetAggregations(aggType,resType)
-				if err != nil{
-					return netutil.ResponseLayout{StatusCode:http.StatusInternalServerError,Error:err.Error(), IsInternalError:true}
-				}
-				cache.Insert(cacheRootAggregation, aggregationKey, torrents)
-				return netutil.ResponseLayout{StatusCode:http.StatusOK,Response:torrents}
 			}
-		}
 		default:
 			return netutil.ResponseLayout{
-				StatusCode:http.StatusBadRequest,
-				Error:"action '"+action+"' not recognized",
+				StatusCode: http.StatusBadRequest,
+				Error:      "action '" + action + "' not recognized",
 			}
 		}
-	}else{
+	} else {
 		return netutil.ResponseLayout{
-			StatusCode:http.StatusBadRequest,
-			Error:"expecting POST request to central, got "+r.Method,
+			StatusCode: http.StatusBadRequest,
+			Error:      "expecting POST request to central, got " + r.Method,
 		}
 	}
 }

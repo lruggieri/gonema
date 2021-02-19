@@ -241,7 +241,6 @@ $(function() {
                                             }
                                         }
                                     }
-
                                 }else{
                                     console.log("currentTorrent is missing some property",currentTorrent);
                                 }
@@ -265,7 +264,6 @@ $(function() {
                         //TODO handle error
                         notifyErrorOnDiv($(".main-submit-button") ,"no torrent available","right");
                     }
-
                 }else{
                     hideLoadingSubmit();
                     //TODO handle error, check first for 'error'

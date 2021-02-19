@@ -11,34 +11,34 @@ import (
 	"time"
 )
 
-const(
+const (
 	connectionsPoolElements = 10
 )
 
-type injector struct{
-	mainHost string
+type injector struct {
+	mainHost          string
 	parametersToShoot []string
-	tps int
+	tps               int
 
-	started bool
+	started           bool
 	injectionFinished int
 }
-func (i *injector) Run(){
-	if i.started{
+
+func (i *injector) Run() {
+	if i.started {
 		util.Logger.Error("injector is already running")
 	}
 	i.started = true
 
-	util.Logger.Info("Injector started for mainHost ",i.mainHost)
+	util.Logger.Info("Injector started for mainHost ", i.mainHost)
 
-
-	for _,parameterToShoot := range i.parametersToShoot{
+	for _, parameterToShoot := range i.parametersToShoot {
 		_ = i.runConfiguration(i.mainHost, parameterToShoot)
 	}
 }
-func (i *injector) runConfiguration(mainHost, parameters string) error{
+func (i *injector) runConfiguration(mainHost, parameters string) error {
 	urlToCall := mainHost
-	if len(parameters) > 0{
+	if len(parameters) > 0 {
 		runeToCall := []rune(urlToCall)
 		if runeToCall[len(runeToCall)-1] != rune('?') {
 			urlToCall += "?"
@@ -47,82 +47,80 @@ func (i *injector) runConfiguration(mainHost, parameters string) error{
 	}
 
 	//first, let's create a pool of connections to the server
-	clientsPool := make([]http.Client,0,connectionsPoolElements)
-	for i := 0 ; i < connectionsPoolElements ; i++{
-		clientsPool = append(clientsPool,http.Client{
-			Transport:&http.Transport{
-				DialContext:(&net.Dialer{Timeout:1*time.Second}).DialContext,
-				TLSHandshakeTimeout:3*time.Second,
+	clientsPool := make([]http.Client, 0, connectionsPoolElements)
+	for i := 0; i < connectionsPoolElements; i++ {
+		clientsPool = append(clientsPool, http.Client{
+			Transport: &http.Transport{
+				DialContext:         (&net.Dialer{Timeout: 1 * time.Second}).DialContext,
+				TLSHandshakeTimeout: 3 * time.Second,
 			},
 		})
 	}
-	util.Logger.Debug("connection pool created with ",connectionsPoolElements, " elements")
-
-
+	util.Logger.Debug("connection pool created with ", connectionsPoolElements, " elements")
 
 	util.Logger.Debug("performing first request...")
-	request,_ := http.NewRequest(http.MethodGet,urlToCall,nil)
+	request, _ := http.NewRequest(http.MethodGet, urlToCall, nil)
 	//the first request (to fill the cache) should have a higher timeout
 	firstClient := http.Client{
-		Transport:&http.Transport{
-			DialContext:(&net.Dialer{Timeout:20*time.Second}).DialContext,
-			TLSHandshakeTimeout:3*time.Second,
+		Transport: &http.Transport{
+			DialContext:         (&net.Dialer{Timeout: 20 * time.Second}).DialContext,
+			TLSHandshakeTimeout: 3 * time.Second,
 		},
 	}
-	firstResult := makeRequest(&firstClient,request)
-	if firstResult.err != nil{
-		return errors.New("problem during first request for '"+parameters+"': "+firstResult.err.Error())
+	firstResult := makeRequest(&firstClient, request)
+	if firstResult.err != nil {
+		return errors.New("problem during first request for '" + parameters + "': " + firstResult.err.Error())
 	}
 
-	util.Logger.Info("First request performed. Starting to shoot at "+strconv.Itoa(i.tps)+" tps")
+	util.Logger.Info("First request performed. Starting to shoot at " + strconv.Itoa(i.tps) + " tps")
 
 	rate := time.Second / time.Duration(i.tps)
 	throttle := time.Tick(rate)
-	for{
+	for {
 		randomClient := clientsPool[util.GetRandomPositiveInt(len(clientsPool))]
-		<- throttle
-		go func(iClient http.Client){
-			res := makeRequest(&randomClient,request)
+		<-throttle
+		go func(iClient http.Client) {
+			res := makeRequest(&randomClient, request)
 			util.Logger.Debug(res.statusCode)
 		}(randomClient)
 	}
 }
 
-func (i *injector) logStats(){}
+func (i *injector) logStats() {}
 
-func makeRequest(iClient *http.Client,iReq *http.Request) (oResult singleInjectionResult){
-	util.Logger.Debug("shooting request for ",iReq.URL)
-	resp,err := iClient.Do(iReq)
-	if err != nil{
+func makeRequest(iClient *http.Client, iReq *http.Request) (oResult singleInjectionResult) {
+	util.Logger.Debug("shooting request for ", iReq.URL)
+	resp, err := iClient.Do(iReq)
+	if err != nil {
 		return singleInjectionResult{
-			err:err,
+			err: err,
 		}
 	}
-	_,_ = io.Copy(ioutil.Discard, resp.Body) //be sure to read all response to avoid connection to drop
+	_, _ = io.Copy(ioutil.Discard, resp.Body) //be sure to read all response to avoid connection to drop
 	defer resp.Body.Close()
 
-	if err != nil{
+	if err != nil {
 		return singleInjectionResult{
-			err:err,
+			err: err,
 		}
-	}else{
+	} else {
 		return singleInjectionResult{
-			timedOut:false,
-			statusCode:resp.StatusCode,
+			timedOut:   false,
+			statusCode: resp.StatusCode,
 		}
 	}
 }
 
-type singleInjectionResult struct{
-	timedOut bool
+type singleInjectionResult struct {
+	timedOut   bool
 	statusCode int
-	err error
+	err        error
 }
 
-func NewInjector(iMainHost string,iParametersToShoot []string, iTps int) *injector{
+func NewInjector(iMainHost string, iParametersToShoot []string, iTps int) *injector {
 	return &injector{
-		mainHost:iMainHost,
-		parametersToShoot:iParametersToShoot,
-		tps:iTps,
+		mainHost:          iMainHost,
+		parametersToShoot: iParametersToShoot,
+		tps:               iTps,
 	}
 }
